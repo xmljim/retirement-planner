@@ -7,13 +7,25 @@
       ADR-005 / ADR-007: the Monte Carlo inner loop is the bounded
       exception to the BigDecimal-only contract. Allow primitive
       double / float in this package only.
+
+      Targeted at the rule's id (set in checkstyle.xml) so that other
+      Regexp-based rules (BigDecimal-from-double, LocalDateTime.now,
+      field injection) still apply to MC code.
     -->
     <suppress files="[/\\]simulation[/\\]montecarlo[/\\]internal[/\\].*" id="primitive-double-ban"/>
-    <suppress files="[/\\]simulation[/\\]montecarlo[/\\]internal[/\\].*" checks="Regexp"/>
 
     <!-- Generated sources -->
     <suppress files=".*[/\\]generated[/\\].*" checks=".*"/>
 
     <!-- Spring Boot main class is exempt from many style rules -->
     <suppress files="RetirementPlannerApplication\.java" checks="HideUtilityClassConstructor"/>
+
+    <!--
+      The Checkstyle-rule self-test legitimately embeds banned patterns
+      (primitive double/float, BigDecimal-from-double) as text fixtures
+      its assertions exercise. Suppress only the specific Regexp rules
+      whose patterns the fixtures contain — every other check still applies.
+    -->
+    <suppress files="CheckstyleRulesTest\.java" id="primitive-double-ban"/>
+    <suppress files="CheckstyleRulesTest\.java" id="bigdecimal-from-double-ban"/>
 </suppressions>

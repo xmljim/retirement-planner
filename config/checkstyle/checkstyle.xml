@@ -120,8 +120,11 @@
         <!-- Project-specific rules (ADR-007, ADR-008, CLAUDE.md)             -->
         <!-- ============================================================== -->
 
-        <!-- ADR-007: `double` and `float` banned outside MC inner loop -->
+        <!-- ADR-007: `double` and `float` banned outside MC inner loop.
+             The id is referenced by suppressions.xml to carve out the MC
+             package only (ADR-005 §The Monte Carlo Exception). -->
         <module name="Regexp">
+            <property name="id" value="primitive-double-ban"/>
             <property name="format" value="\b(double|float)\b\s+\w+|\b(double|float)\[\]"/>
             <property name="message" value="ADR-007: primitive double/float forbidden. Use Money. The MC inner loop is the only sanctioned exception (ADR-005)."/>
             <property name="illegalPattern" value="true"/>
@@ -130,6 +133,7 @@
 
         <!-- CLAUDE.md: ban LocalDateTime.now() and zero-arg new Date() — UTC only -->
         <module name="Regexp">
+            <property name="id" value="utc-localdatetime-ban"/>
             <property name="format" value="LocalDateTime\.now\(\s*\)"/>
             <property name="message" value="UTC required: use Instant.now() per CLAUDE.md, not LocalDateTime.now()."/>
             <property name="illegalPattern" value="true"/>
@@ -137,6 +141,7 @@
         </module>
 
         <module name="Regexp">
+            <property name="id" value="utc-new-date-ban"/>
             <property name="format" value="new\s+Date\(\s*\)"/>
             <property name="message" value="UTC required: use Instant.now() per CLAUDE.md, not new Date()."/>
             <property name="illegalPattern" value="true"/>
@@ -145,6 +150,7 @@
 
         <!-- ADR-007: BigDecimal must not be constructed from a double literal -->
         <module name="Regexp">
+            <property name="id" value="bigdecimal-from-double-ban"/>
             <property name="format" value="new\s+BigDecimal\s*\(\s*\d+\.\d+"/>
             <property name="message" value="ADR-007: do not construct BigDecimal from a double literal. Use new BigDecimal(String) or BigDecimal.valueOf()."/>
             <property name="illegalPattern" value="true"/>
@@ -153,6 +159,7 @@
 
         <!-- CLAUDE.md: no field injection — @Autowired on fields banned -->
         <module name="Regexp">
+            <property name="id" value="field-injection-ban"/>
             <property name="format" value="@Autowired\s*\n\s*private\s+\w"/>
             <property name="message" value="CLAUDE.md: field injection forbidden. Use constructor injection."/>
             <property name="illegalPattern" value="true"/>
