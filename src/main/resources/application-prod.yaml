@@ -1,0 +1,40 @@
+# Production profile. Connection details, secrets, and BlobStore
+# location supplied via environment variables — no secrets in source.
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+server:
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: WARN
+    io.github.xmljim.retirement: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  auth:
+    mode: passkey
+  blobstore:
+    type: ${APP_BLOBSTORE_TYPE:filesystem}
+    root: ${RETIREMENT_DATA_DIR:/var/lib/retirement-planner/blobs}
