@@ -1,31 +1,40 @@
 # Pull Request
 
+<!--
+Per ADR-010 (TBD): one PR per story; squash-merge to main; tag releases.
+Per ADR-011: every PR closes an issue. Per ADR-009: every gate must be green.
+-->
+
 ## Summary
 
 <!-- 1-3 sentences. What changed and why. -->
 
-## Story / Issue
+## Story
 
 Closes #<NN>
 
+<!-- The PR closes the linked story. Issue's Acceptance Criteria must
+all be checked before this PR is merged. -->
+
 ## Traceability
 
-- **PRD requirement(s)**: FR-X.Y, NFR-Z
-- **ADR(s)**:
-- **Epic story**: EPIC-N / S-N.M
+- **Epic**: EPIC-N / S-N.M
+- **PRD**: FR-X.Y, NFR-Z
+- **ADR(s)**: ADR-NNN
 
 ## Changes
 
 <!-- Bullet the user-visible behavior changes and the structural changes. -->
 
-## Testing
+## Test Plan
 
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated (if applicable)
-- [ ] Coverage thresholds met (engine 85/75, domain 75/65, total 70/60)
+- [ ] Coverage thresholds met for the affected module
 - [ ] `./mvnw verify` passes locally
+- [ ] Manual verification (describe, if applicable)
 
-## Quality Gates
+## Quality Gates (per ADR-009)
 
 - [ ] Spotless clean
 - [ ] Checkstyle clean
@@ -33,7 +42,25 @@ Closes #<NN>
 - [ ] SpotBugs clean
 - [ ] ArchUnit rules pass
 - [ ] Modulith verification passes
-- [ ] No new suppressions OR each new suppression has a justification comment
+- [ ] JaCoCo coverage thresholds met
+- [ ] No new suppressions OR each new suppression has a justification
+      comment AND is named below
+
+## New Suppressions (if any)
+
+<!--
+For each new @SuppressWarnings or filter-file entry, list:
+  - File and rule suppressed
+  - Why (one sentence — false positive? trade-off?)
+Empty if no suppressions added.
+-->
+
+_None._
+
+## Definition of Done
+
+This PR satisfies the universal DoD in
+[`CONTRIBUTING.md`](../CONTRIBUTING.md#universal-definition-of-done).
 
 ## Notes for Reviewer
 
