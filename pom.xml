@@ -220,8 +220,13 @@
             <includes>
               <include>src/**/*.yaml</include>
               <include>src/**/*.yml</include>
-              <include>.github/**/*.yml</include>
             </includes>
+            <!--
+              GitHub Actions YAML deliberately excluded: Jackson YAML rewrites
+              block-scalar `run:` scripts into double-quoted strings with
+              embedded line continuations, which is unreadable and brittle.
+              Workflow YAML is hand-edited and validated by GitHub on push.
+            -->
             <jackson/>
           </yaml>
         </configuration>
