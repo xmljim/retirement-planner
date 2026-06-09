@@ -309,6 +309,80 @@ suite on every PR via `.github/workflows/ci.yml`. Branch protection on
 If any gate flags something legitimate that requires a suppression:
 narrowest-possible scope, justification comment required, mention in PR.
 
+## Resuming a Session
+
+Sessions are short relative to the project lifespan. Picking up cleanly
+matters. Use the prompt template below verbatim when starting a fresh
+session — it's the durable inverse of `/session-end`. The owner can
+adapt the bracketed parts (`[story]`, `[context]`) when handing off.
+
+Why a template lives here: composing the prompt fresh each time loses
+nuance and reads inconsistently. A canonical form means every session
+starts from the same baseline and the human only writes what's
+genuinely new.
+
+### Pickup prompt template
+
+```
+Continuing the retirement-planner project at /Users/jearley/code/retirement-planner.
+
+Before doing anything:
+
+1. Read CLAUDE.md — engineering conventions, branching, quality gates,
+   hot-path/cold-path rule
+2. Read WORKING_CONTEXT.md (gitignored, local) — last session's state,
+   what's done, what's next
+3. Check ~/.claude/projects/-Users-jearley-code-retirement-planner/memory/MEMORY.md
+   and follow the linked entries (user role/standards, local dev
+   environment, repo references, feedback)
+4. Confirm: gh auth status shows xmljim active; main is at the latest
+   commit (git pull --ff-only)
+
+Pick up at: [STORY — e.g. "S-1.2 / issue #4: Configure Postgres + Flyway"]
+
+[CONTEXT — anything not in the issue itself, e.g. "Port 5432 is
+occupied by another project; use 5433. Drop the README
+--spring.autoconfigure.exclude workaround once Postgres is up."]
+
+Per ADR-010, work happens on a feature/issue-N-* branch; project
+automation moves the issue through Status; squash-merge after CI green.
+
+Don't write code without first laying out the plan and surfacing
+judgment calls. The owner expects to be checked in with at decision
+points (three-options-with-recommendation works well; the owner picks,
+you implement). The owner holds a high quality bar and pushes back on
+sloppy work.
+
+Run /quality fix, /retirement-style, and ./mvnw verify before commit.
+PR template: .github/pull_request_template.md. Universal Definition of
+Done: CONTRIBUTING.md.
+```
+
+### When to use the template
+
+- **Starting a new session** with a defined next-up story — fill in the
+  bracketed parts and paste.
+- **Mid-session context shift** (e.g. handing off after a long call) —
+  same template, different `[STORY]`.
+- **Spawning a focused sub-agent** for a discrete task — adapt the
+  prompt to the sub-agent's specific scope.
+
+### What goes in `[CONTEXT]`
+
+Anything that's true now but isn't captured in the issue, an ADR, or
+a memory entry. Examples:
+
+- "Port 5432 is occupied by another project's container; use 5433."
+- "Drop the README workaround that was added in PR #76 once Postgres
+  is up."
+- "S-1.6 depends on Money (S-1.3) being merged — confirm before
+  starting."
+- "User has been thinking about X overnight; ask before assuming the
+  prior decision still holds."
+
+If the context is durable (recurring across sessions), it belongs in
+a memory entry instead. The `[CONTEXT]` block is for *this transition*.
+
 ## Memory Hygiene
 
 Run `/session-end` at natural breakpoints — typically:
