@@ -156,6 +156,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Checkstyle API for programmatic rule verification (S-1.4 / ADR-007). -->
+    <dependency>
+      <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId>
+      <version>${checkstyle.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- SpotBugs annotations for justified suppressions -->
     <dependency>
       <groupId>com.github.spotbugs</groupId>
