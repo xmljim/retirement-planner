@@ -13,7 +13,8 @@
     <!-- Best practices -->
     <rule ref="category/java/bestpractices.xml">
         <!-- JUnit5 disagrees on some rules; we'll re-enable as needed -->
-        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <!-- PMD 7 renamed JUnitTestContainsTooManyAsserts → UnitTestContainsTooManyAsserts. -->
+        <exclude name="UnitTestContainsTooManyAsserts"/>
         <exclude name="GuardLogStatement"/>
         <!-- We use AssertJ; PMD's preference for plain JUnit asserts is wrong here -->
         <exclude name="JUnitAssertionsShouldIncludeMessage"/>
