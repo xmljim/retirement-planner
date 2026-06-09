@@ -62,6 +62,30 @@ full architectural-decision index.
 
 A passing `mvn verify` is the precondition for every PR.
 
+## Running
+
+The default `local` profile expects Postgres running on `localhost:5432`
+(brought up via `podman compose up`). Until issue
+[#4 — Configure Postgres + Flyway](https://github.com/xmljim/retirement-planner/issues/4)
+lands the `compose.yaml` services and Flyway baseline, run without
+the database autoconfigured:
+
+```bash
+./mvnw spring-boot:run \
+  -Dspring-boot.run.profiles=default \
+  -Dspring-boot.run.arguments="--spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration"
+```
+
+After #4 merges:
+
+```bash
+podman compose up -d   # bring up Postgres
+./mvnw spring-boot:run # uses the local profile by default
+```
+
+The app listens on **http://localhost:8181**. Health endpoint:
+`http://localhost:8181/actuator/health`.
+
 ## Contributing
 
 This is currently a personal project. Issues and PRs are welcome under the

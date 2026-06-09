@@ -23,10 +23,11 @@ class ApplicationModulesIntegrationTest {
 
     @Test
     void modules_are_inspectable() {
-        // Confirms ApplicationModules introspection works. Empty-module
-        // case is acceptable during scaffolding; once EPIC-1 lands the
-        // count assertion below tightens.
+        // Per ADR-008, the project declares 10 top-level modules. New
+        // modules require an ADR amendment, so this assertion is
+        // intentionally exact: drift means someone moved something
+        // without updating the architectural contract.
         var modules = ApplicationModules.of(RetirementPlannerApplication.class);
-        assertThat(modules.stream().count()).isGreaterThanOrEqualTo(0);
+        assertThat(modules.stream().count()).isEqualTo(10);
     }
 }

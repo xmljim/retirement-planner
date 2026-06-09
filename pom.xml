@@ -74,12 +74,12 @@
       <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-docker-compose</artifactId>
-      <scope>runtime</scope>
-      <optional>true</optional>
-    </dependency>
+    <!--
+      spring-boot-docker-compose was deliberately removed: it shells out to
+      the `docker` binary which we don't have (per ADR-001, Podman is the
+      project's container runtime). Compose lifecycle is managed directly
+      via `podman compose up` / `down` per CONTRIBUTING.md.
+    -->
     <dependency>
       <groupId>org.springframework.modulith</groupId>
       <artifactId>spring-modulith-actuator</artifactId>
@@ -218,15 +218,22 @@
           </pom>
           <yaml>
             <includes>
-              <include>src/**/*.yaml</include>
-              <include>src/**/*.yml</include>
+              <!--
+                Test fixtures and data files only. Application config under
+                src/main/resources/ is hand-edited and validated by Spring
+                Boot at startup; Jackson YAML strips comments and quotes
+                every value, which destroys readability without adding
+                meaningful enforcement.
+
+                GitHub Actions YAML is excluded for the same reason —
+                block-scalar `run:` scripts get mangled into double-quoted
+                strings with embedded line continuations.
+              -->
+              <include>src/test/resources/**/*.yaml</include>
+              <include>src/test/resources/**/*.yml</include>
+              <include>src/main/resources/data/**/*.yaml</include>
+              <include>src/main/resources/data/**/*.yml</include>
             </includes>
-            <!--
-              GitHub Actions YAML deliberately excluded: Jackson YAML rewrites
-              block-scalar `run:` scripts into double-quoted strings with
-              embedded line continuations, which is unreadable and brittle.
-              Workflow YAML is hand-edited and validated by GitHub on push.
-            -->
             <jackson/>
           </yaml>
         </configuration>

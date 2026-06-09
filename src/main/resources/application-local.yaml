@@ -1,0 +1,38 @@
+# Local development profile. Spun up via `podman compose up` per
+# ADR-001 (Podman, not Docker).
+#
+# Postgres connection details are placeholders until S-1.2 lands the
+# compose.yaml services and Flyway baseline migration. Until then,
+# starting the app with --spring.profiles.active=local will fail loudly
+# at the datasource auto-configuration step. That's intentional:
+# no silent degradation.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/retirement_planner
+    username: retirement
+    password: retirement
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+logging:
+  level:
+    root: INFO
+    io.github.xmljim.retirement: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,modulith,prometheus

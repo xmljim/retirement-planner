@@ -1,4 +1,35 @@
----
 spring:
   application:
-    name: "retirement-planner"
+    name: retirement-planner
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+server:
+  port: 8181
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Application-specific configuration. See ADR-001 (auth modes),
+# ADR-006 (BlobStore), ADR-008 (Modulith).
+app:
+  auth:
+    # Mode: stub | passkey. Stub injects a single 'owner' principal
+    # for solo development. Passkey lands in S-1.8 / EPIC-8.
+    mode: stub
+  blobstore:
+    # Local filesystem implementation per ADR-006. SaaS phase swaps
+    # to S3/GCS/Azure-Blob; the interface stays the same.
+    type: filesystem
+    root: ${RETIREMENT_DATA_DIR:./data/blobs}
+  disclaimer: >-
+    Output is illustrative and not financial advice.
+    The model captures the most material provisions of US federal and
+    state tax law for retirement planning, but is not a substitute for
+    a licensed financial advisor or tax professional.
