@@ -35,6 +35,10 @@ build/
 ### Claude Code (project) ###
 # Per-developer state; shared settings live in settings.json
 .claude/settings.local.json
+# Per-session working context: written by /session-end, read at session
+# start. Local-only — durable session record lives in commit messages,
+# PR descriptions, and Claude memory. See CLAUDE.md "Memory Hygiene".
+WORKING_CONTEXT.md
 # Skills inherited from other projects; only project-local skills are committed
 .claude/skills/agent-check/
 .claude/skills/agent-notify/
