@@ -19,3 +19,4 @@ rejected. ADRs are versioned with the codebase; supersession is explicit
 | [ADR-008](ADR-008-module-boundaries-and-modulith.md) | Module Boundaries with Spring Modulith | Accepted |
 | [ADR-009](ADR-009-quality-gates.md) | Quality Gates — Toolchain & Enforcement | Accepted |
 | [ADR-010](ADR-010-branching-strategy.md) | Branching Strategy — Trunk-Based Development | Accepted |
+| [ADR-011](ADR-011-project-and-issue-topology.md) | Project Board, Milestone, and Issue Topology | Accepted |
