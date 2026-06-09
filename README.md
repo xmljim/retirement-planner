@@ -64,27 +64,33 @@ A passing `mvn verify` is the precondition for every PR.
 
 ## Running
 
-The default `local` profile expects Postgres running on `localhost:5432`
-(brought up via `podman compose up`). Until issue
-[#4 — Configure Postgres + Flyway](https://github.com/xmljim/retirement-planner/issues/4)
-lands the `compose.yaml` services and Flyway baseline, run without
-the database autoconfigured:
-
 ```bash
-./mvnw spring-boot:run \
-  -Dspring-boot.run.profiles=default \
-  -Dspring-boot.run.arguments="--spring.autoconfigure.exclude=org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration"
-```
-
-After #4 merges:
-
-```bash
-podman compose up -d   # bring up Postgres
+podman compose up -d   # bring up Postgres on localhost:5433
 ./mvnw spring-boot:run # uses the local profile by default
 ```
 
 The app listens on **http://localhost:8181**. Health endpoint:
 `http://localhost:8181/actuator/health`.
+
+### Postgres on localhost:5433
+
+The compose file maps Postgres to host port **5433** (not the default
+5432) so it doesn't collide with any other Postgres container you may
+already be running. The container itself listens on 5432 internally;
+only the host mapping changed. If you need to connect with `psql`:
+
+```bash
+psql -h localhost -p 5433 -U retirement retirement_planner
+```
+
+### Podman, not Docker
+
+Per [ADR-001](.sdlc/artifacts/adr/ADR-001-platform-and-infrastructure.md),
+this project's container runtime is **Podman**. The compose file uses
+the standard Compose syntax, which is also Docker-compatible — so
+contributors who only have Docker installed can substitute
+`docker compose` for `podman compose`. All project documentation and
+scripts say `podman`.
 
 ## Contributing
 

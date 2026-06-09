@@ -1,1 +1,31 @@
-services: {}
+# Local development services. Per ADR-001 this project targets Podman
+# (compose syntax is Docker-compatible, so Docker users still work; the
+# project's commands and docs say `podman compose`).
+#
+# Bring up:   podman compose up -d
+# Tear down:  podman compose down
+#
+# The host port is 5433 (not the Postgres default of 5432) to avoid
+# colliding with other Postgres containers a developer may already be
+# running. The container itself listens on 5432 as usual.
+services:
+  postgres:
+    image: postgres:17
+    container_name: retirement-planner-postgres
+    environment:
+      POSTGRES_DB: retirement_planner
+      POSTGRES_USER: retirement
+      POSTGRES_PASSWORD: retirement
+    ports:
+      - "5433:5432"
+    volumes:
+      - retirement-planner-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retirement -d retirement_planner"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  retirement-planner-postgres-data:
