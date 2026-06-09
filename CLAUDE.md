@@ -255,16 +255,28 @@ them rather than duplicating their workflows here.
 ## Development Workflow (Trunk-Based per ADR-010)
 
 `main` is the only long-lived branch. All work happens on short-lived
-`feature/*` branches and merges back via PR.
+`feature/*` branches and merges back via PR. Project board status moves
+are automated — see ADR-011 and `.github/workflows/project-automation.yml`:
 
-1. Read the relevant ADRs and PRD section before starting
-2. Confirm the change matches the ADR contract or raise a question
-3. Branch off `main`: `git checkout -b feature/issue-NN-short-description`
-4. Make the change with tests
-5. Run quality gates locally — see "Quality Gates" below
-6. Open a PR back to `main`; CI must be green before merge
-7. Squash-merge (linear history); branch is deleted after merge
-8. For larger changes, present a plan and wait for approval before implementing
+- Push `feature/issue-NN-*` → issue auto-moves to **In Progress**
+- Open PR with `Closes #NN` → issue auto-moves to **In Review**
+- Merge PR → issue auto-moves to **Done** and closes
+
+Per-story workflow:
+
+1. Pick a story from the Project board's "Ready" column
+2. Read its linked Epic / PRD / ADR references in the issue
+3. Branch: `git checkout -b feature/issue-NN-short-description` from `main`
+4. Implement with tests
+5. Run quality gates locally — `./mvnw verify` must pass
+6. Run `/quality fix`, `/java-review`, `/retirement-style` before commit
+7. Commit referencing the issue: `git commit -m "Add X (#NN)"`
+8. Push and `gh pr create --base main` with `Closes #NN` in the body
+9. CI runs all 9 status checks — they must pass before merge
+10. `gh pr merge --squash --delete-branch` after CI green
+11. Run `/session-end` at natural breakpoints (see Memory Hygiene)
+
+For larger changes, present a plan and wait for approval before implementing.
 
 ## Quality Gates (ADR-009)
 
@@ -296,6 +308,21 @@ suite on every PR via `.github/workflows/ci.yml`. Branch protection on
 
 If any gate flags something legitimate that requires a suppression:
 narrowest-possible scope, justification comment required, mention in PR.
+
+## Memory Hygiene
+
+Run `/session-end` at natural breakpoints — typically:
+
+- **After a story merges** to `main` (the per-story save point)
+- **At the end of a working session**, even if no story merged
+- **After a substantive decision** that future sessions need to know about (a new ADR, a scope change, a new convention)
+
+`/session-end` updates `WORKING_CONTEXT.md` and the memory index so the
+next session inherits accurate state. Stale memory is worse than no
+memory — it leads future sessions to act on outdated facts.
+
+When picking up a session, the inverse habit: **read `WORKING_CONTEXT.md`
+and `.sdlc/context/session-context.yaml` first** before starting work.
 
 ## Releases (ADR-010)
 
