@@ -71,7 +71,15 @@ field drives Project board grouping.
 1. **Board "By Status"** — kanban (Backlog / Ready / In Progress / In Review / Done) — daily working view
 2. **Table "Current Wave"** — filtered by milestone; grouped by Epic; sorted by Priority then Points
 3. **Table "By Epic"** — grouped by Epic field — backlog visibility per epic
-4. **Table "All open"** — flat table for ad-hoc sorting/filtering
+4. **Table "All Open"** — flat table for ad-hoc sorting/filtering
+
+**Manual setup required**: GitHub's GraphQL API does not expose view
+creation as of this writing — `createProjectV2View` and
+`updateProjectV2View` mutations do not exist. Fields, custom options,
+and items can be managed programmatically; views cannot. The four views
+above must be created via the web UI at the project URL. Configuration
+steps are documented in `scripts/setup-project-views.md` for repeatable
+setup if the project is ever rebuilt.
 
 ### Status automation
 
