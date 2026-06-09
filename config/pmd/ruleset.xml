@@ -1,0 +1,147 @@
+<?xml version="1.0"?>
+<ruleset name="Retirement Planner PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        PMD rules for retirement-planner. See ADR-009.
+        Style is Spotless+Checkstyle's job; this catches code smells,
+        bug-prone patterns, and project conventions from CLAUDE.md.
+    </description>
+
+    <!-- Best practices -->
+    <rule ref="category/java/bestpractices.xml">
+        <!-- JUnit5 disagrees on some rules; we'll re-enable as needed -->
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="GuardLogStatement"/>
+        <!-- We use AssertJ; PMD's preference for plain JUnit asserts is wrong here -->
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <!-- Spring beans / records often have many params legitimately -->
+        <exclude name="UseVarargs"/>
+        <!-- ImplicitFunctionalInterface is a stylistic preference; opt-in per case -->
+        <exclude name="ImplicitFunctionalInterface"/>
+    </rule>
+
+    <!-- Design rules — exclude UseUtilityClass for Spring Boot main classes -->
+    <!-- (keep the rest of design.xml below; just suppressing this one signal) -->
+
+    <!-- Code style -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortMethodName"/>
+        <exclude name="LinguisticNaming"/>
+        <!-- Conflict with Checkstyle's import ordering -->
+        <exclude name="UnnecessaryImport"/>
+        <!-- Style preference: `var` is preferred (modern Java per design philosophy) -->
+        <exclude name="UseExplicitTypes"/>
+        <!-- Final-everything is noise; rely on Checkstyle for discipline where useful -->
+        <exclude name="MethodArgumentCouldBeFinal"/>
+        <exclude name="LocalVariableCouldBeFinal"/>
+        <!-- We allow snake_case for test methods and ArchUnit rule fields (configured via override) -->
+        <exclude name="MethodNamingConventions"/>
+        <exclude name="FieldNamingConventions"/>
+    </rule>
+
+    <!-- Re-add naming conventions with project-aware patterns -->
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions">
+        <properties>
+            <!-- JUnit5 tests can use snake_case for readability -->
+            <property name="junit5TestPattern" value="[a-z][a-zA-Z0-9_]*"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/FieldNamingConventions">
+        <properties>
+            <!-- Allow snake_case for static-final fields (e.g. ArchUnit rules) -->
+            <property name="constantPattern" value="[A-Z][A-Z_0-9]*|[a-z][a-zA-Z0-9_]*"/>
+        </properties>
+    </rule>
+
+    <!-- Design -->
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="DataClass"/>
+        <!-- Records and value types legitimately have many fields -->
+        <exclude name="TooManyFields"/>
+        <!-- Spring Boot main classes legitimately have only static methods -->
+        <exclude name="UseUtilityClass"/>
+    </rule>
+
+    <!-- Error-prone -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+    </rule>
+
+    <!-- Performance -->
+    <rule ref="category/java/performance.xml"/>
+
+    <!-- Multithreading -->
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="DoNotUseThreads"/>
+        <exclude name="UseConcurrentHashMap"/>
+    </rule>
+
+    <!-- Security — strict ADR-007 BigDecimal rule -->
+    <rule ref="category/java/errorprone.xml/AvoidDecimalLiteralsInBigDecimalConstructor">
+        <priority>1</priority>
+    </rule>
+
+    <!-- ============================================================ -->
+    <!-- Project-specific rules (CLAUDE.md, ADR-008)                   -->
+    <!-- ============================================================ -->
+
+    <!-- CLAUDE.md: ban fully-qualified names in code bodies; use imports -->
+    <rule name="NoFullyQualifiedNames"
+          language="java"
+          message="CLAUDE.md: do not use fully-qualified class names in code. Add an import."
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Use imports rather than fully-qualified class references. Improves
+            readability and keeps the import block as the single source of
+            truth for a file's dependencies. Suppress with
+            @SuppressWarnings("PMD.NoFullyQualifiedNames") only when there's
+            a true import collision that can't be resolved otherwise.
+        </description>
+        <priority>2</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+                    //ClassType[
+                        @FullyQualified='true'
+                        and not(starts-with(@SimpleName, 'java.lang'))
+                    ]
+                ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- CLAUDE.md: ban enhanced-for / for-each loops; use Stream API -->
+    <rule name="NoEnhancedForLoop"
+          language="java"
+          message="CLAUDE.md: enhanced-for loops banned. Use Stream API. Suppress with @SuppressWarnings(&quot;PMD.NoEnhancedForLoop&quot;) only when ordering-sensitive side effects don't compose as a stream."
+          class="net.sourceforge.pmd.lang.rule.xpath.XPathRule">
+        <description>
+            Per CLAUDE.md, this codebase uses Stream API exclusively.
+            Enhanced-for loops are banned project-wide.
+        </description>
+        <priority>2</priority>
+        <properties>
+            <property name="xpath">
+                <value><![CDATA[
+                    //ForeachStatement
+                ]]></value>
+            </property>
+        </properties>
+    </rule>
+
+
+
+</ruleset>

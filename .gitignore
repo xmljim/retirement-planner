@@ -1,0 +1,91 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Claude Code (project) ###
+# Per-developer state; shared settings live in settings.json
+.claude/settings.local.json
+# Skills inherited from other projects; only project-local skills are committed
+.claude/skills/agent-check/
+.claude/skills/agent-notify/
+.claude/skills/api-change/
+.claude/skills/api-types/
+.claude/skills/bugs/
+.claude/skills/design-doc/
+.claude/skills/frontend-align/
+.claude/skills/integration-test/
+.claude/skills/issue/
+.claude/skills/java-controller/
+.claude/skills/java-entity/
+.claude/skills/java-review/
+.claude/skills/java-service/
+.claude/skills/javadoc/
+.claude/skills/license/
+.claude/skills/migration/
+.claude/skills/openapi/
+.claude/skills/pr/
+.claude/skills/pr-comments/
+.claude/skills/project-add/
+.claude/skills/project-points/
+.claude/skills/project-status/
+.claude/skills/project-view/
+.claude/skills/quality/
+.claude/skills/react-component/
+.claude/skills/react-hook/
+.claude/skills/react-test/
+.claude/skills/release/
+.claude/skills/sdlc-artifact/
+.claude/skills/sdlc-define/
+.claude/skills/sdlc-discover/
+.claude/skills/sdlc-status/
+.claude/skills/session-end/
+.claude/skills/technical-debt/
+.claude/skills/test/
+.claude/skills/unit-test/
+# Per-developer hook scripts
+.claude/hooks/
+.claude/settings.json
+
+### Local dev artifacts ###
+.m2/
+*.log
+logs/
+
+### Application data (per ADR-006: BlobStore local impl writes here) ###
+data/blobs/
+
+### Environment ###
+.env
+.env.local
+*.pem
+*.key

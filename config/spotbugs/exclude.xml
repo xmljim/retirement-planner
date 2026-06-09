@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusions for retirement-planner. Per ADR-009: keep this
+  list short and intentional. Each entry should have a comment.
+-->
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- Spring Boot main class: SpotBugs flags the @SpringBootApplication
+         convention; these are false positives. -->
+    <Match>
+        <Class name="~.*\.RetirementPlannerApplication"/>
+        <Bug pattern="UWF_UNWRITTEN_FIELD,UPM_UNCALLED_PRIVATE_METHOD"/>
+    </Match>
+
+    <!-- Generated sources -->
+    <Match>
+        <Source name="~.*[/\\]generated[/\\].*"/>
+    </Match>
+
+    <!-- Records: SpotBugs sometimes flags getter accessors as
+         EI_EXPOSE_REP. Records have value semantics; this is intended. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Class name="~.*\.(model|dto|api\.dto|shared)\..*"/>
+    </Match>
+</FindBugsFilter>

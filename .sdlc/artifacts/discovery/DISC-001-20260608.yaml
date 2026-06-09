@@ -1,0 +1,219 @@
+id: DISC-001
+title: "Retirement Planner — Discovery"
+created: "2026-06-08"
+status: draft
+
+problem_statement: |
+  Existing retirement-planning tools fall into two camps: oversimplified
+  calculators that hide the assumptions, and advisor-grade software that's
+  expensive, opaque, and not tunable for unusual scenarios like early
+  retirement. The owner has been modeling his plan in an Excel spreadsheet
+  (planner.xlsx, Sheet2) that captures the right ideas — a "bridge bucket"
+  to span the gap between retirement and Medicare/Social Security, separate
+  pre/post-retirement return rates, inflation-adjusted budget — but the
+  spreadsheet has structural limits:
+
+    - It models a single retirement account; real plans involve 401(k),
+      Trad IRA, Roth IRA, HSA, taxable brokerage, and possibly a pension.
+    - The accumulation phase (contributions and growth before retirement)
+      is hand-waved: a single rate, no contribution limits, no employer
+      match, no catch-up rules, no IRA/HSA/taxable distinctions.
+    - No tax modeling beyond an implicit pre-tax assumption — no brackets,
+      no RMDs, no Roth conversion modeling, no state tax.
+    - Goals beyond "spend $X/month and cover healthcare" — travel, one-time
+      purchases, legacy targets — have no first-class representation.
+    - Returns are deterministic; no way to ask "what's the probability this
+      plan succeeds under realistic market volatility?"
+
+  The goal is a planning tool that exposes the right knobs (retirement age,
+  SS election age, return assumptions, contribution rates, bucket goals)
+  and produces a defensible projection across both accumulation and
+  decumulation phases, with Monte Carlo to quantify uncertainty.
+
+stakeholders:
+  - name: "Owner / Primary User"
+    role: "Pre-retiree planning his own retirement"
+    concerns:
+      - "Accurate modeling of the bridge gap before SS/Medicare"
+      - "Side-by-side comparison of retire-at-N scenarios"
+      - "Confidence in tax projections (federal + state + RMDs + Roth conversions)"
+      - "Ability to model goal-based buckets (travel, bucket-list items, legacy)"
+      - "Probability-of-success view via Monte Carlo, not just point estimates"
+  - name: "Future SaaS users"
+    role: "Hypothetical end users when the tool becomes multi-tenant"
+    concerns:
+      - "Privacy of financial data"
+      - "Authentication that doesn't require yet another password (passkeys)"
+      - "Plan portability / export"
+  - name: "Owner-as-developer"
+    role: "Solo maintainer building a portfolio-quality codebase"
+    concerns:
+      - "Modern Java patterns (Optional, streams, immutability, BigDecimal for money)"
+      - "Architecture that scales from solo to SaaS without rewrites"
+      - "Reusable bucket abstraction for future goal types"
+      - "Reproducible scenario versioning (Parquet snapshots)"
+
+current_state: |
+  The owner manages his retirement plan in an Excel workbook
+  (~/planner.xlsx). Sheet2 contains a 38-year monthly time series
+  (rows 2–463) classifying each month as BUCKET (pre-Social-Security,
+  drawing down a bridge balance) or RETIREMENT (post-SS, retirement
+  account compounds and is drawn down). Inputs include DOB for self
+  and spouse, Medicare start dates (auto-derived from DOB+65),
+  elected SS age + FRA amount with early/late election adjustment,
+  retirement date, current retirement balance, pre/post-retirement
+  return rates, inflation rate, cash-interest rate on the bridge
+  account, desired monthly retirement budget, and estimated monthly
+  healthcare cost during the Medicare gap.
+
+  Pain points:
+    - Single retirement account; can't model 401(k) vs IRA vs Roth vs HSA vs taxable.
+    - Pre-retirement growth is a single compounded rate from "now" to retirement
+      — no contribution stream, no employer match, no contribution-limit indexing,
+      no catch-up tiers (50+, 60+), no rollovers between account types.
+    - No tax model. Withdrawals are treated as pre-tax dollars implicitly.
+    - No way to express goals like "spend $20k/yr on travel ages 60–75" or
+      "$100k for an RV in 2032" or "leave $500k to heirs."
+    - Returns are deterministic; can't quantify success probability.
+    - No scenario management — what-if analysis means duplicating the workbook.
+    - Display is in nominal dollars only; no toggle to real (today's) dollars.
+
+pain_points:
+  - "Spreadsheet collapses all retirement assets into one account"
+  - "Accumulation phase has no contribution model — pre-retirement growth is a single compounded rate"
+  - "No contribution-limit, employer-match, or catch-up modeling"
+  - "No tax model (federal brackets, state, RMDs, Roth conversions)"
+  - "Goals like travel, bucket-list items, and legacy aren't first-class"
+  - "Deterministic returns hide tail risk and sequence-of-returns risk"
+  - "What-if analysis requires duplicating the workbook"
+  - "Display is nominal-only; no real-dollar view"
+  - "No notion of rollovers between account types"
+
+desired_outcome: |
+  A web application (Spring Boot backend, React/TypeScript frontend) that
+  lets the user define a retirement plan as a structured set of inputs —
+  demographics, accounts with balances and monthly contributions, buckets
+  for goal-based spending, and assumption knobs — and produces a
+  continuous monthly projection from today through end-of-plan covering
+  the accumulation, bridge, and drawdown phases. Each phase respects
+  contribution limits, employer match, tax rules, and bucket draws as
+  appropriate. Monte Carlo simulation reports probability of plan success.
+  Multiple scenarios can be saved, cloned, and visually compared.
+
+success_criteria:
+  - metric: "Replicates spreadsheet output for matched inputs"
+    target: "Within 1% of Sheet2 month-by-month bridge/retirement balances given identical inputs"
+  - metric: "Accumulation phase modeled with multiple account types"
+    target: "Supports at minimum: Traditional 401(k), Roth 401(k), Trad IRA, Roth IRA, HSA, Taxable brokerage"
+  - metric: "Tax model coverage"
+    target: "Federal brackets, standard deduction, taxable SS, RMDs at 73/75, Roth conversions, state tax"
+  - metric: "Monte Carlo runs in reasonable time"
+    target: "1000 simulations of a 50-year plan complete in < 5 seconds server-side"
+  - metric: "Bucket abstraction is extensible"
+    target: "New bucket type added by implementing a Bucket interface and registering — no core engine changes"
+  - metric: "Scenario comparison"
+    target: "User can overlay >= 2 scenarios on the same chart for portfolio value and success probability"
+
+scope:
+  in_scope:
+    # Modeling
+    - "Continuous monthly time-series projection (accumulation + bridge + drawdown phases)"
+    - "Multiple account types with type-specific tax treatment (Trad, Roth, HSA, Taxable)"
+    - "Pre-retirement contributions modeled parametrically: salary, salary growth, contribution % or $, annual contribution escalation, employer match, IRS limits with inflation indexing and 50+/60+ catch-up"
+    - "Inter-account rollovers (e.g. 401(k) → IRA at retirement)"
+    - "Bridge bucket: gap between retirement and Medicare/Social Security with healthcare cost"
+    - "Goal-based buckets: travel (recurring annual), bucket-list (one-time), healthcare (explicit), legacy (target)"
+    - "Pluggable Bucket abstraction so new bucket types can be added"
+    - "Federal + state income tax, standard deduction, taxable Social Security, RMDs (73/75), Roth conversions"
+    - "Social Security: FRA amount, early/late election adjustment, spousal benefit"
+    - "Inflation handling, with display toggle: nominal (default) ↔ real"
+    - "Monte Carlo simulation with glide-path asset allocation, historical-bootstrap returns sourced from Parquet datasets"
+    - "Scenario management: save, name, clone-and-tweak, compare visually"
+    - "Scenario versioning via Parquet snapshots (immutable history)"
+    # Platform
+    - "Spring Boot backend (Java)"
+    - "React + TypeScript frontend"
+    - "PostgreSQL persistence with Flyway migrations"
+    - "Passkey-based authentication (architecturally ready; may stub for solo phase)"
+    - "Local development via Podman + compose (Docker substitute, licensing-friendly)"
+    - "SaaS-ready architecture (multi-tenancy boundaries observed even while solo)"
+  out_of_scope:
+    - "Mobile-native applications (responsive web only)"
+    - "Account aggregation via Plaid or similar — balances entered manually"
+    - "Multi-user collaboration on a single plan / scenario sharing"
+    - "Tax-loss harvesting and asset-location optimization"
+    - "Real-time market data integration"
+    - "Financial-advice features (this is a planning tool, not advice)"
+    - "Estate-planning depth beyond a legacy target (no trusts, gifting strategies, etc.)"
+    - "Insurance modeling (LTC, life, annuities)"
+
+constraints:
+  - "Java + Spring Boot backend (matches owner's stack, places-maps-spring conventions)"
+  - "All monetary values use BigDecimal; never double/float for money"
+  - "All timestamps in UTC (Instant); display layer handles local time"
+  - "Optional<T> for absent values; null reserved for JSON DTOs only"
+  - "Stream API over for-each loops"
+  - "Controllers delegate to services; no business logic in controllers"
+  - "Podman for local containers, not Docker"
+  - "Cloud-agnostic for deployment; specific cloud chosen later"
+  - "Parquet for scenario history snapshots and historical-returns datasets"
+  - "Output is illustrative, not financial advice — disclaimer required in UI"
+
+assumptions:
+  - "User enters current account balances manually (no aggregation/Plaid in v1)"
+  - |
+    Contributions are derived from a parameterized model rather than entered
+    month-by-month. Inputs per contributing account include:
+      - Current salary (base, plus optional bonus modeling)
+      - Expected annual salary increase rate
+      - Individual contribution as either a percent of salary OR a fixed dollar amount
+      - Optional annual escalation of the contribution rate (e.g. +1%/yr until cap)
+      - Employer match formula (e.g. 100% of first 3%, 50% of next 2%)
+      - IRS contribution limit for the account type, with annual indexing for inflation
+        and the appropriate catch-up tier (50+, 60+) applied automatically
+    The engine compounds month-by-month using the active return assumption (deterministic
+    or Monte Carlo draw) and caps employee+employer contributions at the IRS limit per
+    account per year.
+  - "User is comfortable supplying tax-relevant inputs (filing status, state of residence, expected income)"
+  - "Historical returns dataset will bundle a fixed set of asset classes (e.g. US large cap, US small cap, intl developed, EM, US bonds, cash) with monthly returns going back several decades"
+  - "IRS contribution limits and tax brackets are loaded from a config dataset that can be updated annually without code changes"
+  - "Single legal jurisdiction at v1: United States; no foreign tax considerations"
+  - "Solo phase will run locally (no remote auth required); SaaS phase reuses the same domain model"
+  - "BigDecimal precision and rounding rules are codified once and reused (probably HALF_EVEN, scale 2 for display, higher internally)"
+
+resolved_decisions:
+  - decision: "Frontend lives in a separate repository"
+    rationale: "Matches the places-maps-spring / places-maps-react pattern; clear boundary, independent CI."
+    target_artifact: "ADR — Repository Topology"
+  - decision: "Per-bucket funding policy"
+    rationale: "Bridge=pre-funded at retirement, Travel=sinking-fund during accumulation, Bucket-list=pull-on-demand, Legacy=target constraint. Each bucket type chooses its own funding strategy. Reinforces the Bucket abstraction."
+    target_artifact: "ADR — Bucket Abstraction & Funding Policies"
+  - decision: "Explicit user-defined rollover events"
+    rationale: "User adds rollover events with date and amount (e.g. 401(k) → Trad IRA at retirement). Engine applies tax rules at the event. No automatic defaults."
+    target_artifact: "ADR — Account Rollovers"
+  - decision: "Per-spouse accounts and incomes"
+    rationale: "Each spouse has independent salary, contributions, accounts, SS amount, and election age. Joint accounts (taxable brokerage, joint HSA where applicable) supported separately."
+    target_artifact: "ADR — Domain Model: Household, Spouses, Accounts"
+  - decision: "Historical-returns datasets bundled now; loader interface allows externalization later"
+    rationale: "Simplicity for v1; clean abstraction so SaaS-phase swap to S3/CDN is a config change, not a rewrite."
+    target_artifact: "ADR — Historical Returns Data Distribution"
+  - decision: "Scenario JSON import/export deferred to v1.1; DTO↔entity boundary architected for it now"
+    rationale: "Not a v1 blocker. Keeping the boundary clean avoids retrofit cost."
+    target_artifact: "ADR — Scenario Persistence & Versioning (Parquet)"
+  - decision: "Use the IRS Uniform Lifetime Table for RMDs (full table, configurable)"
+    rationale: "Accurate, defensible, and the table is small. Stored as configuration so IRS revisions don't require a code change."
+    target_artifact: "ADR — Tax Engine"
+  - decision: "Salary modeled as single growth rate with optional override events"
+    rationale: "Smooth growth covers the common case; date-stamped override events handle promotions, job changes, sabbaticals. Avoids forcing users to enumerate segments upfront."
+    target_artifact: "ADR — Accumulation Phase & Contribution Model"
+
+deferred_questions:
+  - "Joint Life Table for RMDs when spouse is >10yr younger — defer until owner's spousal situation requires it; engine should make the table swap-able."
+  - "Bonus modeling depth (lump-sum vs % of salary) — capture in PRD, defer detail to design."
+
+related_artifacts:
+  spreadsheet_reference: "/Users/jearley/planner.xlsx (Sheet2)"
+  forthcoming:
+    - "ADRs (architectural decisions surfaced during discovery)"
+    - "PRD (product requirements derived from this discovery)"
+    - "Epics & user stories (decomposed from the PRD)"

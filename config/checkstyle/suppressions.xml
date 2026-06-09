@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+<suppressions>
+    <!--
+      ADR-005 / ADR-007: the Monte Carlo inner loop is the bounded
+      exception to the BigDecimal-only contract. Allow primitive
+      double / float in this package only.
+    -->
+    <suppress files="[/\\]simulation[/\\]montecarlo[/\\]internal[/\\].*" id="primitive-double-ban"/>
+    <suppress files="[/\\]simulation[/\\]montecarlo[/\\]internal[/\\].*" checks="Regexp"/>
+
+    <!-- Generated sources -->
+    <suppress files=".*[/\\]generated[/\\].*" checks=".*"/>
+
+    <!-- Spring Boot main class is exempt from many style rules -->
+    <suppress files="RetirementPlannerApplication\.java" checks="HideUtilityClassConstructor"/>
+</suppressions>
