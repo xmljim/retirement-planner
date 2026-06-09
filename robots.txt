@@ -1,0 +1,81 @@
+# robots.txt — opt-out signals for AI / ML training crawlers
+#
+# This file documents the project's stance for any crawler that
+# checks repo-root robots.txt as a courtesy signal. The legally
+# operative document is LICENSE-ADDENDUM.md §1, which prohibits
+# use of this repository as input to AI / machine-learning training.
+#
+# Public-visibility on a hosting platform is not consent.
+
+# OpenAI
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Anthropic
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Google AI
+User-agent: Google-Extended
+Disallow: /
+
+# Meta AI
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+# Common Crawl (used as training data by many)
+User-agent: CCBot
+Disallow: /
+
+# Apple
+User-agent: Applebot-Extended
+Disallow: /
+
+# Bytedance
+User-agent: Bytespider
+Disallow: /
+
+# Cohere
+User-agent: cohere-ai
+Disallow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Disallow: /
+
+# Amazon
+User-agent: Amazonbot
+Disallow: /
+
+# Yandex
+User-agent: YandexBot
+Disallow: /
+
+# DataForSEO
+User-agent: DataForSeoBot
+Disallow: /
+
+# Diffbot
+User-agent: Diffbot
+Disallow: /
+
+# Omgili / Webz.io
+User-agent: Omgilibot
+Disallow: /
+
+# All others: see LICENSE-ADDENDUM.md for terms.
