@@ -50,12 +50,9 @@
     </rule>
 
     <!-- Re-add naming conventions with project-aware patterns -->
-    <rule ref="category/java/codestyle.xml/MethodNamingConventions">
-        <properties>
-            <!-- JUnit5 tests can use snake_case for readability -->
-            <property name="junit5TestPattern" value="[a-z][a-zA-Z0-9_]*"/>
-        </properties>
-    </rule>
+    <rule ref="category/java/codestyle.xml/MethodNamingConventions"/>
+    <!-- All methods (including JUnit5 tests) must be camelCase. Tests use @DisplayName
+         for the human-readable description. -->
     <rule ref="category/java/codestyle.xml/FieldNamingConventions">
         <properties>
             <!-- Allow snake_case for static-final fields (e.g. ArchUnit rules) -->
@@ -72,6 +69,11 @@
         <exclude name="TooManyFields"/>
         <!-- Spring Boot main classes legitimately have only static methods -->
         <exclude name="UseUtilityClass"/>
+        <!-- TooManyMethods is a coarse method-count threshold that fires on legitimate
+             value-type test classes (one method per behavior). The fat-class concern is
+             covered more precisely by GodClass, CyclomaticComplexity, CognitiveComplexity,
+             NPathComplexity, and NcssCount, which remain enabled. -->
+        <exclude name="TooManyMethods"/>
     </rule>
 
     <!-- Error-prone -->

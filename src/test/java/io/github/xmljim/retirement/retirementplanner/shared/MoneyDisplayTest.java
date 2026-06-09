@@ -7,6 +7,7 @@ package io.github.xmljim.retirement.retirementplanner.shared;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -14,30 +15,35 @@ import org.junit.jupiter.params.provider.CsvSource;
 class MoneyDisplayTest {
 
     @Test
-    void display_scale_constant_is_two() {
+    @DisplayName("DISPLAY_SCALE is 2 (cents)")
+    void displayScaleConstantIsTwo() {
         assertThat(MoneyDisplay.DISPLAY_SCALE).isEqualTo(2);
     }
 
     @Test
-    void rounds_internal_scale_six_to_display_scale_two() {
+    @DisplayName("rounds internal scale-6 amount to display scale-2")
+    void roundsInternalScaleSixToDisplayScaleTwo() {
         var m = Money.usd("12.345678");
         assertThat(MoneyDisplay.toDisplay(m)).isEqualByComparingTo("12.35");
         assertThat(MoneyDisplay.toDisplay(m).scale()).isEqualTo(2);
     }
 
     @Test
-    void preserves_amounts_already_at_display_scale() {
+    @DisplayName("preserves amounts already at display scale")
+    void preservesAmountsAlreadyAtDisplayScale() {
         assertThat(MoneyDisplay.toDisplay(Money.usd("12.34"))).isEqualByComparingTo("12.34");
     }
 
     @Test
-    void zero_renders_as_zero_at_scale_two() {
+    @DisplayName("zero renders as 0.00")
+    void zeroRendersAsZeroAtScaleTwo() {
         assertThat(MoneyDisplay.toDisplay(Money.ZERO_USD)).isEqualByComparingTo("0.00");
         assertThat(MoneyDisplay.toDisplay(Money.ZERO_USD).scale()).isEqualTo(2);
     }
 
     @Test
-    void negative_amounts_round_with_half_even() {
+    @DisplayName("negative amounts round with HALF_EVEN")
+    void negativeAmountsRoundWithHalfEven() {
         // -12.345 → tie at the cents boundary; HALF_EVEN picks the even neighbor
         assertThat(MoneyDisplay.toDisplay(Money.usd("-12.345"))).isEqualByComparingTo("-12.34");
     }
@@ -53,7 +59,8 @@ class MoneyDisplayTest {
         "0.005, 0.00", // 5 ties, preceding 0 is even → stays 0
         "0.015, 0.02", // 5 ties, preceding 1 is odd → up to 2
     })
-    void half_even_rounding_at_display_scale_boundary(String input, String expected) {
+    @DisplayName("HALF_EVEN tie-breaking at the display-scale boundary")
+    void halfEvenRoundingAtDisplayScaleBoundary(String input, String expected) {
         assertThat(MoneyDisplay.toDisplay(Money.usd(input))).isEqualByComparingTo(expected);
     }
 }

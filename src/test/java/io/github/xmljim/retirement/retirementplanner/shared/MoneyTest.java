@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-@SuppressWarnings("PMD.TooManyMethods") // Value-type tests legitimately have many small focused methods.
 class MoneyTest {
 
     private static final Currency USD = Currency.getInstance("USD");
@@ -25,7 +25,8 @@ class MoneyTest {
     // ---------- factories & canonical constructor ----------
 
     @Test
-    void of_creates_money_with_normalized_scale() {
+    @DisplayName("of() creates a Money normalized to internal scale")
+    void ofCreatesMoneyWithNormalizedScale() {
         var m = Money.of(new BigDecimal("12.5"), USD);
         assertThat(m.amount()).isEqualByComparingTo("12.5");
         assertThat(m.amount().scale()).isEqualTo(Money.INTERNAL_SCALE);
@@ -33,7 +34,8 @@ class MoneyTest {
     }
 
     @Test
-    void usd_constructs_from_string_literal() {
+    @DisplayName("usd() constructs from a string literal")
+    void usdConstructsFromStringLiteral() {
         var m = Money.usd("12345.67");
         assertThat(m.amount()).isEqualByComparingTo("12345.67");
         assertThat(m.amount().scale()).isEqualTo(Money.INTERNAL_SCALE);
@@ -41,28 +43,32 @@ class MoneyTest {
     }
 
     @Test
-    void zero_usd_constant_is_zero_dollars() {
+    @DisplayName("ZERO_USD constant is zero dollars at internal scale")
+    void zeroUsdConstantIsZeroDollars() {
         assertThat(Money.ZERO_USD.amount()).isEqualByComparingTo("0");
         assertThat(Money.ZERO_USD.amount().scale()).isEqualTo(Money.INTERNAL_SCALE);
         assertThat(Money.ZERO_USD.currency()).isEqualTo(USD);
     }
 
     @Test
-    void canonical_constructor_rejects_null_amount() {
+    @DisplayName("canonical constructor rejects null amount")
+    void canonicalConstructorRejectsNullAmount() {
         assertThatThrownBy(() -> new Money(null, USD))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount");
     }
 
     @Test
-    void canonical_constructor_rejects_null_currency() {
+    @DisplayName("canonical constructor rejects null currency")
+    void canonicalConstructorRejectsNullCurrency() {
         assertThatThrownBy(() -> new Money(BigDecimal.ONE, null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("currency");
     }
 
     @Test
-    void canonical_constructor_normalizes_higher_scale_with_half_even() {
+    @DisplayName("canonical constructor normalizes higher-scale input with HALF_EVEN")
+    void canonicalConstructorNormalizesHigherScaleWithHalfEven() {
         // 1.0000005 at scale 6 with HALF_EVEN rounds to 1.000000 (5 with even preceding)
         var m = Money.of(new BigDecimal("1.0000005"), USD);
         assertThat(m.amount()).isEqualByComparingTo("1.000000");
@@ -70,7 +76,8 @@ class MoneyTest {
     }
 
     @Test
-    void equality_works_after_scale_normalization() {
+    @DisplayName("equality works after scale normalization (1.0 USD == 1.00 USD)")
+    void equalityWorksAfterScaleNormalization() {
         // Records use BigDecimal.equals which would fail without canonical
         // normalization: new BigDecimal("1.0").equals(new BigDecimal("1.00")) == false
         var a = Money.of(new BigDecimal("1.0"), USD);
@@ -80,7 +87,8 @@ class MoneyTest {
     }
 
     @Test
-    void same_amount_different_currency_is_not_equal() {
+    @DisplayName("same amount in different currencies is not equal")
+    void sameAmountDifferentCurrencyIsNotEqual() {
         var a = Money.of(BigDecimal.ONE, USD);
         var b = Money.of(BigDecimal.ONE, EUR);
         assertThat(a).isNotEqualTo(b);
@@ -89,25 +97,29 @@ class MoneyTest {
     // ---------- arithmetic ----------
 
     @Test
-    void plus_adds_within_currency() {
+    @DisplayName("plus() adds within the same currency")
+    void plusAddsWithinCurrency() {
         var sum = Money.usd("10.50").plus(Money.usd("2.25"));
         assertThat(sum.amount()).isEqualByComparingTo("12.75");
     }
 
     @Test
-    void minus_subtracts_within_currency() {
+    @DisplayName("minus() subtracts within the same currency")
+    void minusSubtractsWithinCurrency() {
         var diff = Money.usd("10.50").minus(Money.usd("2.25"));
         assertThat(diff.amount()).isEqualByComparingTo("8.25");
     }
 
     @Test
-    void times_multiplies_by_a_unitless_factor() {
+    @DisplayName("times() multiplies by a unitless factor")
+    void timesMultipliesByUnitlessFactor() {
         var doubled = Money.usd("12.50").times(BigDecimal.valueOf(2));
         assertThat(doubled.amount()).isEqualByComparingTo("25");
     }
 
     @Test
-    void times_rounds_result_to_internal_scale() {
+    @DisplayName("times() rounds the product to internal scale")
+    void timesRoundsResultToInternalScale() {
         // 1.0 * 0.0000001 = 0.00000001 → rounded to scale 6 = 0.000000 (HALF_EVEN, 1 < 5)
         var product = Money.usd("1.0").times(new BigDecimal("0.0000001"));
         assertThat(product.amount()).isEqualByComparingTo("0");
@@ -115,7 +127,8 @@ class MoneyTest {
     }
 
     @Test
-    void divided_by_divides_with_scale_6_rounding() {
+    @DisplayName("dividedBy() divides at scale 6 with HALF_EVEN")
+    void dividedByDividesWithScale6Rounding() {
         // 1 / 3 at scale 6 HALF_EVEN = 0.333333
         var third = Money.usd("1").dividedBy(new BigDecimal("3"));
         assertThat(third.amount()).isEqualByComparingTo("0.333333");
@@ -123,12 +136,14 @@ class MoneyTest {
     }
 
     @Test
-    void divided_by_zero_throws_arithmetic_exception() {
+    @DisplayName("dividedBy(zero) throws ArithmeticException")
+    void dividedByZeroThrows() {
         assertThatThrownBy(() -> Money.usd("1").dividedBy(BigDecimal.ZERO)).isInstanceOf(ArithmeticException.class);
     }
 
     @Test
-    void negate_returns_additive_inverse() {
+    @DisplayName("negate() returns the additive inverse")
+    void negateReturnsAdditiveInverse() {
         assertThat(Money.usd("10.00").negate().amount()).isEqualByComparingTo("-10.00");
         assertThat(Money.usd("-7.50").negate().amount()).isEqualByComparingTo("7.50");
         assertThat(Money.ZERO_USD.negate().amount()).isEqualByComparingTo("0");
@@ -137,19 +152,22 @@ class MoneyTest {
     // ---------- null-arg defenses ----------
 
     @Test
-    void plus_rejects_null_other() {
+    @DisplayName("plus(null) throws NullPointerException")
+    void plusRejectsNull() {
         assertThatThrownBy(() -> Money.ZERO_USD.plus(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void times_rejects_null_factor() {
+    @DisplayName("times(null) throws NullPointerException with parameter name")
+    void timesRejectsNullFactor() {
         assertThatThrownBy(() -> Money.ZERO_USD.times(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("factor");
     }
 
     @Test
-    void divided_by_rejects_null_divisor() {
+    @DisplayName("dividedBy(null) throws NullPointerException with parameter name")
+    void dividedByRejectsNullDivisor() {
         assertThatThrownBy(() -> Money.ZERO_USD.dividedBy(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("divisor");
@@ -158,7 +176,8 @@ class MoneyTest {
     // ---------- cross-currency operations ----------
 
     @Test
-    void plus_throws_on_currency_mismatch() {
+    @DisplayName("plus() throws on currency mismatch with both codes in the message")
+    void plusThrowsOnCurrencyMismatch() {
         var dollars = Money.of(BigDecimal.ONE, USD);
         var euros = Money.of(BigDecimal.ONE, EUR);
         assertThatThrownBy(() -> dollars.plus(euros))
@@ -168,7 +187,8 @@ class MoneyTest {
     }
 
     @Test
-    void minus_throws_on_currency_mismatch() {
+    @DisplayName("minus() throws on currency mismatch with both codes in the message")
+    void minusThrowsOnCurrencyMismatch() {
         var dollars = Money.of(BigDecimal.ONE, USD);
         var euros = Money.of(BigDecimal.ONE, EUR);
         assertThatThrownBy(() -> dollars.minus(euros))
@@ -190,14 +210,16 @@ class MoneyTest {
         "1.0000011, 1.000001", // < 5 → round down
         "1.0000019, 1.000002", // > 5 → round up
     })
-    void half_even_rounding_at_internal_scale_boundary(String input, String expected) {
+    @DisplayName("HALF_EVEN tie-breaking at the internal-scale boundary")
+    void halfEvenRoundingAtInternalScaleBoundary(String input, String expected) {
         assertThat(Money.usd(input).amount()).isEqualByComparingTo(expected);
     }
 
     // ---------- precision over many additions (NFR-7 / ADR-007) ----------
 
     @Test
-    void summing_ten_cents_a_thousand_times_yields_exactly_one_hundred_dollars() {
+    @DisplayName("summing 0.10 USD a thousand times yields exactly 100 USD")
+    void summingTenCentsAThousandTimesYieldsExactlyOneHundredDollars() {
         // The classic floating-point trap: 0.1 + 0.1 + ... 1000 times in
         // double would drift; with BigDecimal scale-6 it must be exact.
         var dime = Money.usd("0.10");
@@ -207,7 +229,8 @@ class MoneyTest {
     }
 
     @Test
-    void summing_one_third_dollar_three_times_does_not_drift() {
+    @DisplayName("summing 1/3 USD three times stays at bounded scale-6 precision")
+    void summingOneThirdDollarThreeTimesDoesNotDrift() {
         var third = Money.usd("1").dividedBy(new BigDecimal("3"));
         var sum = third.plus(third).plus(third);
         // 0.333333 + 0.333333 + 0.333333 = 0.999999 (loss is bounded; expected at scale 6)
@@ -215,7 +238,8 @@ class MoneyTest {
     }
 
     @Test
-    void large_balance_arithmetic_remains_exact() {
+    @DisplayName("large balances retain scale-6 precision")
+    void largeBalanceArithmeticRemainsExact() {
         // Verify that scale-6 internal precision handles realistic balances
         // without precision loss.
         var balance = Money.usd("1234567.890123");
