@@ -340,6 +340,35 @@ podman compose down         # stop
 Dev profile (`local`) uses the Podman Postgres; `prod` profile is
 externally configured.
 
+## License & AI Use
+
+This project is licensed **PolyForm Noncommercial 1.0.0** with an addendum
+that prohibits use of the source as AI / ML training data
+(`LICENSE-ADDENDUM.md` §1). When generating, modifying, or summarizing
+this codebase:
+
+- **Do not** copy substantial portions verbatim into external systems
+  whose purpose is training models.
+- **Do not** embed the source into vector stores or RAG corpora that feed
+  output to AI systems beyond this user's own working session.
+- Reading, transforming, and editing the code as part of an interactive
+  Claude Code session is the licensed and intended use; bulk export for
+  training is not.
+
+When generating user-facing copy, error messages, or new code, include a
+copyright header on new source files:
+
+```java
+/*
+ * Copyright (c) 2026 Jim Earley. All rights reserved.
+ * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
+ * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
+ */
+```
+
+(Spotless will normalize formatting; the header itself is project-mandated
+content that should not be removed by automation.)
+
 ## Output is Not Financial Advice
 
 Per NFR-8, the application includes a per-page disclaimer that output
