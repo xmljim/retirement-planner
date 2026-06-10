@@ -10,6 +10,15 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+    show-sql: false
 
 server:
   forward-headers-strategy: framework
