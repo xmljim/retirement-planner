@@ -7,6 +7,7 @@ package io.github.xmljim.retirement.retirementplanner.plan.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -199,7 +200,7 @@ class PlanRepositoryIntegrationTest {
     }
 
     private void whenTenantIs(long tenantId) {
-        org.mockito.Mockito.when(tenantContext.currentTenantId()).thenReturn(tenantId);
+        when(tenantContext.currentTenantId()).thenReturn(tenantId);
     }
 
     private long lookupTenantIdBySlug(String slug) {

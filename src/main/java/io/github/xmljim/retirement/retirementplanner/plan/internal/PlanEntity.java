@@ -17,6 +17,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -74,14 +76,14 @@ class PlanEntity {
         person.setPlan(this);
     }
 
-    @jakarta.persistence.PrePersist
+    @PrePersist
     void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
-    @jakarta.persistence.PreUpdate
+    @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
     }

@@ -12,6 +12,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 /**
@@ -37,14 +39,14 @@ class SalaryProfileEntity {
         return id;
     }
 
-    @jakarta.persistence.PrePersist
+    @PrePersist
     void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
-    @jakarta.persistence.PreUpdate
+    @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
     }
