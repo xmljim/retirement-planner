@@ -2,10 +2,6 @@
 # per ADR-001 (Podman, not Docker). The host port is 5433 to avoid
 # colliding with any other Postgres container the developer may have on
 # the standard 5432.
-#
-# JPA is intentionally not configured yet — the `spring-boot-starter-data-jpa`
-# dependency lands with the first entity in S-1.6 (Account/Sleeve), at which
-# point the spring.jpa.* block returns alongside it.
 
 spring:
   datasource:
@@ -16,6 +12,17 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: false
+  jpa:
+    # Flyway owns the schema; Hibernate must never alter it.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: true
+    show-sql: false
 
 logging:
   level:

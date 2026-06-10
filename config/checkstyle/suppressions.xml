@@ -28,4 +28,13 @@
     -->
     <suppress files="CheckstyleRulesTest\.java" id="primitive-double-ban"/>
     <suppress files="CheckstyleRulesTest\.java" id="bigdecimal-from-double-ban"/>
+
+    <!--
+      Spring Boot test slices (@DataJpaTest et al.) and the Mockito bean-
+      override mechanism (@MockitoBean) only operate on fields. The
+      project's constructor-injection rule applies to production wiring;
+      test-slice plumbing is a sanctioned exception narrowly scoped to
+      *IntegrationTest.java and *Test.java in src/test/java.
+    -->
+    <suppress files="[/\\]src[/\\]test[/\\]java[/\\].*Test\.java" id="field-injection-ban"/>
 </suppressions>
