@@ -6,6 +6,7 @@
 package io.github.xmljim.retirement.retirementplanner.plan.internal;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,13 @@ class AccountServiceImpl implements AccountService {
 
     @Override
     public Account create(PlanId planId, Account account) {
-        Account stamped = Account.of(planId, account.type(), account.owner(), account.sleeves());
+        Account stamped = new Account(
+                Optional.empty(),
+                planId,
+                account.type(),
+                account.owner(),
+                account.sleeves(),
+                account.contributionPolicy());
         return repository.save(stamped);
     }
 
@@ -51,7 +58,12 @@ class AccountServiceImpl implements AccountService {
     public Account replace(AccountId id, Account replacement) {
         Account existing = repository.findById(id).orElseThrow(() -> notFound(id));
         Account merged = new Account(
-                existing.id(), existing.planId(), replacement.type(), replacement.owner(), replacement.sleeves());
+                existing.id(),
+                existing.planId(),
+                replacement.type(),
+                replacement.owner(),
+                replacement.sleeves(),
+                replacement.contributionPolicy());
         return repository.save(merged);
     }
 

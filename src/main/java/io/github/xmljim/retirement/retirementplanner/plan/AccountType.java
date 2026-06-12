@@ -19,6 +19,10 @@ public enum AccountType {
     TRADITIONAL_401K,
     /** Roth 401(k) — post-tax contributions, qualified withdrawals tax-free. */
     ROTH_401K,
+    /** Traditional 403(b) — public-school / nonprofit analogue of Traditional 401(k). */
+    TRADITIONAL_403B,
+    /** Roth 403(b) — public-school / nonprofit analogue of Roth 401(k). */
+    ROTH_403B,
     /** Traditional IRA — pre-tax (or deductible) contributions, ordinary income on withdrawal. */
     TRADITIONAL_IRA,
     /** Roth IRA — post-tax contributions, qualified withdrawals tax-free. */

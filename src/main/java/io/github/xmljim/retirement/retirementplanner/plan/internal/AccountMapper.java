@@ -36,9 +36,8 @@ import jakarta.persistence.PersistenceContext;
  * Translates between the public {@link Account} record and the JPA
  * {@link AccountEntity}. Sealed sub-types ({@link SleeveKind},
  * {@link SleeveYieldPolicy}) round-trip through a TEXT discriminator
- * + JSONB payload — the discriminator picks the variant, the payload
- * carries variant-specific data (only {@code FixedAllocation} and
- * {@code FixedRate} have any).
+ * + JSONB payload. Contribution-policy persistence delegates to
+ * {@link ContributionPolicyMapper} to keep coupling within PMD limits.
  */
 @Component
 class AccountMapper {
@@ -48,12 +47,14 @@ class AccountMapper {
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private final PlanJpaRepository planJpa;
+    private final ContributionPolicyMapper contributionPolicyMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    AccountMapper(PlanJpaRepository planJpa) {
+    AccountMapper(PlanJpaRepository planJpa, ContributionPolicyMapper contributionPolicyMapper) {
         this.planJpa = planJpa;
+        this.contributionPolicyMapper = contributionPolicyMapper;
     }
 
     Account toRecord(AccountEntity entity) {
@@ -67,7 +68,8 @@ class AccountMapper {
                 new PlanId(entity.getPlan().getId()),
                 entity.getAccountType(),
                 owner,
-                sleeves);
+                sleeves,
+                contributionPolicyMapper.toRecord(entity));
     }
 
     AccountEntity toEntity(Account account) {
@@ -91,6 +93,7 @@ class AccountMapper {
                 entity.setOwnerPerson(null);
             }
         }
+        contributionPolicyMapper.apply(entity, account.contributionPolicy());
     }
 
     private AccountSleeve toSleeveRecord(AccountSleeveEntity entity) {
@@ -149,7 +152,7 @@ class AccountMapper {
         return entity;
     }
 
-    private String writeJson(Object value) {
+    private static String writeJson(Object value) {
         try {
             return JSON.writeValueAsString(value);
         } catch (JsonProcessingException e) {
@@ -157,7 +160,7 @@ class AccountMapper {
         }
     }
 
-    private <T> T readJson(String value, TypeReference<T> type) {
+    private static <T> T readJson(String value, TypeReference<T> type) {
         try {
             return JSON.readValue(value, type);
         } catch (IOException e) {
@@ -165,7 +168,7 @@ class AccountMapper {
         }
     }
 
-    private <T> T readJson(String value, Class<T> type) {
+    private static <T> T readJson(String value, Class<T> type) {
         try {
             return JSON.readValue(value, type);
         } catch (IOException e) {

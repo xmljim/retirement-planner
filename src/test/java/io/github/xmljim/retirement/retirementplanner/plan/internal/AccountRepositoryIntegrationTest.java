@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,9 +31,15 @@ import io.github.xmljim.retirement.retirementplanner.plan.Account;
 import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
 import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
 import io.github.xmljim.retirement.retirementplanner.plan.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.ContributionPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.EmployerMatch;
+import io.github.xmljim.retirement.retirementplanner.plan.EscalationPolicy;
 import io.github.xmljim.retirement.retirementplanner.plan.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.FixedDollar;
 import io.github.xmljim.retirement.retirementplanner.plan.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.MatchTier;
 import io.github.xmljim.retirement.retirementplanner.plan.OwnerRef;
+import io.github.xmljim.retirement.retirementplanner.plan.PercentOfSalary;
 import io.github.xmljim.retirement.retirementplanner.plan.Person;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
@@ -59,6 +66,7 @@ class AccountRepositoryIntegrationTest {
 
     private static final long SOLO_TENANT = TenantContext.SOLO_TENANT_ID;
     private static final String OTHER_TENANT_SLUG = "other";
+    private static final String FIVE_PCT = "0.05";
 
     @Container
     @ServiceConnection
@@ -152,7 +160,7 @@ class AccountRepositoryIntegrationTest {
         Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "TX");
 
         Map<String, BigDecimal> weights = Map.of(
-                "EQUITY", new BigDecimal("0.65"), "BOND", new BigDecimal("0.30"), "CASH", new BigDecimal("0.05"));
+                "EQUITY", new BigDecimal("0.65"), "BOND", new BigDecimal("0.30"), "CASH", new BigDecimal(FIVE_PCT));
         AccountSleeve fixed = AccountSleeve.of(
                 new SleeveKind.FixedAllocation(weights),
                 Money.usd("50000.00"),
@@ -174,7 +182,7 @@ class AccountRepositoryIntegrationTest {
         assertThat(fa.weights())
                 .containsEntry("EQUITY", new BigDecimal("0.65"))
                 .containsEntry("BOND", new BigDecimal("0.30"))
-                .containsEntry("CASH", new BigDecimal("0.05"));
+                .containsEntry("CASH", new BigDecimal(FIVE_PCT));
         assertThat(reloadedSleeve.yieldPolicy()).isInstanceOf(SleeveYieldPolicy.FixedRate.class);
         assertThat(((SleeveYieldPolicy.FixedRate) reloadedSleeve.yieldPolicy()).annualRate())
                 .isEqualByComparingTo(new BigDecimal("0.0375"));
@@ -254,6 +262,82 @@ class AccountRepositoryIntegrationTest {
                 .getSingleResult());
         assertThat(accountCount.longValue()).isZero();
         assertThat(sleeveCount.longValue()).isZero();
+    }
+
+    @Test
+    @DisplayName("ContributionPolicy with PercentOfSalary + escalation + match round-trips through JSONB")
+    void contributionPolicyPercentRoundTrip() {
+        whenTenantIs(SOLO_TENANT);
+        Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "VA");
+        ContributionPolicy policy = new ContributionPolicy(
+                new PercentOfSalary(new BigDecimal(FIVE_PCT)),
+                Optional.of(new EscalationPolicy(new BigDecimal("0.01"), new BigDecimal("0.15"))),
+                Optional.of(new EmployerMatch(List.of(
+                        new MatchTier(new BigDecimal("0.03"), new BigDecimal("1.00")),
+                        new MatchTier(new BigDecimal(FIVE_PCT), new BigDecimal("0.50"))))),
+                Optional.of(LocalDate.of(2026, 1, 1)),
+                Optional.of(LocalDate.of(2040, 12, 31)));
+
+        Account saved = repository.save(Account.of(
+                plan.id().orElseThrow(),
+                AccountType.TRADITIONAL_401K,
+                new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
+                List.of(AccountSleeve.of(
+                        new SleeveKind.AssetAllocation(),
+                        Money.usd("250000.00"),
+                        new SleeveYieldPolicy.TracksAllocation())),
+                policy));
+
+        Account reloaded = repository.findById(saved.id().orElseThrow()).orElseThrow();
+        assertThat(reloaded.contributionPolicy()).isPresent();
+        ContributionPolicy reloadedPolicy = reloaded.contributionPolicy().orElseThrow();
+        assertThat(reloadedPolicy.employee()).isInstanceOf(PercentOfSalary.class);
+        assertThat(((PercentOfSalary) reloadedPolicy.employee()).pct()).isEqualByComparingTo(FIVE_PCT);
+        assertThat(reloadedPolicy.escalation()).isPresent();
+        assertThat(reloadedPolicy.escalation().orElseThrow().annualIncrease()).isEqualByComparingTo("0.01");
+        assertThat(reloadedPolicy.match()).isPresent();
+        assertThat(reloadedPolicy.match().orElseThrow().tiers()).hasSize(2);
+        assertThat(reloadedPolicy.startDate()).contains(LocalDate.of(2026, 1, 1));
+        assertThat(reloadedPolicy.endDate()).contains(LocalDate.of(2040, 12, 31));
+    }
+
+    @Test
+    @DisplayName("ContributionPolicy with FixedDollar and no match round-trips")
+    void contributionPolicyFixedDollarRoundTrip() {
+        whenTenantIs(SOLO_TENANT);
+        Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "VA");
+        ContributionPolicy policy = ContributionPolicy.of(new FixedDollar(Money.usd("23000.00")));
+
+        Account saved = repository.save(Account.of(
+                plan.id().orElseThrow(),
+                AccountType.TRADITIONAL_IRA,
+                new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
+                List.of(AccountSleeve.of(
+                        new SleeveKind.AssetAllocation(),
+                        Money.usd("100.00"),
+                        new SleeveYieldPolicy.TracksAllocation())),
+                policy));
+
+        Account reloaded = repository.findById(saved.id().orElseThrow()).orElseThrow();
+        ContributionPolicy reloadedPolicy = reloaded.contributionPolicy().orElseThrow();
+        assertThat(reloadedPolicy.employee()).isInstanceOf(FixedDollar.class);
+        assertThat(((FixedDollar) reloadedPolicy.employee()).annualAmount()).isEqualTo(Money.usd("23000.00"));
+        assertThat(reloadedPolicy.escalation()).isEmpty();
+        assertThat(reloadedPolicy.match()).isEmpty();
+        assertThat(reloadedPolicy.startDate()).isEmpty();
+        assertThat(reloadedPolicy.endDate()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Account without a contribution policy persists with null discriminator")
+    void contributionPolicyAbsentRoundTrip() {
+        whenTenantIs(SOLO_TENANT);
+        Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "VA");
+        Account saved = repository.save(Account.withDefaultSleeve(
+                plan.id().orElseThrow(), AccountType.ROTH_IRA, new OwnerRef.Joint(), Money.usd("1000.00")));
+
+        Account reloaded = repository.findById(saved.id().orElseThrow()).orElseThrow();
+        assertThat(reloaded.contributionPolicy()).isEmpty();
     }
 
     @Test
