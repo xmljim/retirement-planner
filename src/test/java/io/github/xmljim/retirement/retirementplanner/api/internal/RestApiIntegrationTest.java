@@ -17,13 +17,11 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -50,11 +48,7 @@ import jakarta.persistence.PersistenceContext;
 // MockMvc's chained .andExpect(...) calls ARE the assertions, but PMD's UnitTestShouldIncludeAssert can't recognize
 // the fluent form; .throws Exception is the idiomatic shape for MockMvc's checked-exception API; static imports for
 // MockMvc DSL are conventional and project-wide.
-@SuppressWarnings({
-    "PMD.ExcessiveImports",
-    "PMD.UnitTestShouldIncludeAssert",
-    "PMD.SignatureDeclareThrowsException",
-    "PMD.TooManyStaticImports"
+@SuppressWarnings({"PMD.UnitTestShouldIncludeAssert", "PMD.SignatureDeclareThrowsException", "PMD.TooManyStaticImports"
 })
 @Testcontainers
 @SpringBootTest
@@ -96,14 +90,10 @@ class RestApiIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @MockitoBean
-    private TenantContext tenantContext;
-
     private final ObjectMapper json = new ObjectMapper();
 
     @BeforeEach
     void cleanState() {
-        Mockito.when(tenantContext.currentTenantId()).thenReturn(SOLO_TENANT);
         transactionTemplate.executeWithoutResult(status -> {
             entityManager.createQuery("DELETE FROM AccountSleeveEntity").executeUpdate();
             entityManager.createQuery("DELETE FROM AccountEntity").executeUpdate();

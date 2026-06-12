@@ -29,12 +29,38 @@
 
     <!-- findsecbugs SPRING_ENDPOINT flags every @RequestMapping method as
          a "Spring endpoint to audit." This codebase IS a REST API; every
-         such method is intentionally exposed. Auth lands in S-1.8; CSRF
-         concerns are addressed by the auth/session strategy there, not
-         per-endpoint. The advisory is duplicated for *Operations
-         interfaces and their *Controller impls, doubling the noise. -->
+         such method is intentionally exposed. Auth (S-1.8) installs a
+         stub principal in stub mode; passkey lands in EPIC-8. The
+         advisory is duplicated for *Operations interfaces and their
+         *Controller impls, doubling the noise. -->
     <Match>
         <Bug pattern="SPRING_ENDPOINT"/>
         <Class name="~io\.github\.xmljim\.retirement\.retirementplanner\.api\..*"/>
+    </Match>
+
+    <!-- OriginCheckFilter intentionally reads Origin/Referer headers —
+         that's its job. findsecbugs flags any header read as advisory;
+         the threat model and limits are documented in the filter's
+         Javadoc (defense in depth, not a CSRF substitute). -->
+    <Match>
+        <Class name="io.github.xmljim.retirement.retirementplanner.shared.internal.OriginCheckFilter"/>
+        <Bug pattern="SERVLET_HEADER,SERVLET_HEADER_REFERER"/>
+    </Match>
+
+    <!-- HttpSecurity.build() declares Exception in the Spring Security
+         API; bubbling it from a SecurityFilterChain @Bean is the
+         canonical pattern. -->
+    <Match>
+        <Class name="io.github.xmljim.retirement.retirementplanner.shared.internal.SecurityConfig"/>
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION"/>
+    </Match>
+
+    <!-- StubAuthenticationToken is created per-request and never stored
+         in a session (stateless SessionCreationPolicy in SecurityConfig).
+         Spring Security's AbstractAuthenticationToken implements
+         Serializable; the transient principal is intentional. -->
+    <Match>
+        <Class name="~io\.github\.xmljim\.retirement\.retirementplanner\.shared\.internal\.StubAuthenticationFilter\$StubAuthenticationToken"/>
+        <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED"/>
     </Match>
 </FindBugsFilter>
