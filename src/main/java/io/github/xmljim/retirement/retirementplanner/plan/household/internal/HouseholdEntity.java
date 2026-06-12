@@ -3,11 +3,12 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.household.internal;
 
 import java.time.Instant;
 
-import io.github.xmljim.retirement.retirementplanner.plan.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "household")
-class HouseholdEntity {
+public class HouseholdEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,43 +48,43 @@ class HouseholdEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    PlanEntity getPlan() {
+    public PlanEntity getPlan() {
         return plan;
     }
 
-    void setPlan(PlanEntity plan) {
+    public void setPlan(PlanEntity plan) {
         this.plan = plan;
     }
 
-    FilingStatus getFilingStatus() {
+    public FilingStatus getFilingStatus() {
         return filingStatus;
     }
 
-    void setFilingStatus(FilingStatus filingStatus) {
+    public void setFilingStatus(FilingStatus filingStatus) {
         this.filingStatus = filingStatus;
     }
 
-    String getState() {
+    public String getState() {
         return state;
     }
 
-    void setState(String state) {
+    public void setState(String state) {
         this.state = state;
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 }

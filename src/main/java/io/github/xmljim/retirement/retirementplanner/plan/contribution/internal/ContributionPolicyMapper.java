@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.contribution.internal;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -17,13 +17,14 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.xmljim.retirement.retirementplanner.plan.ContributionAmount;
-import io.github.xmljim.retirement.retirementplanner.plan.ContributionPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.EmployerMatch;
-import io.github.xmljim.retirement.retirementplanner.plan.EscalationPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.FixedDollar;
-import io.github.xmljim.retirement.retirementplanner.plan.MatchTier;
-import io.github.xmljim.retirement.retirementplanner.plan.PercentOfSalary;
+import io.github.xmljim.retirement.retirementplanner.plan.account.internal.AccountEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionAmount;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EmployerMatch;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EscalationPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.FixedDollar;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.MatchTier;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.PercentOfSalary;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
 
 /**
@@ -37,11 +38,11 @@ import io.github.xmljim.retirement.retirementplanner.shared.Money;
  * pattern as {@code IrsLimitsYaml}. The mapper bridges.
  */
 @Component
-class ContributionPolicyMapper {
+public class ContributionPolicyMapper {
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
-    Optional<ContributionPolicy> toRecord(AccountEntity entity) {
+    public Optional<ContributionPolicy> toRecord(AccountEntity entity) {
         if (entity.getContributionAmountType() == null) {
             return Optional.empty();
         }
@@ -68,7 +69,7 @@ class ContributionPolicyMapper {
                 Optional.ofNullable(entity.getContributionEndDate())));
     }
 
-    void apply(AccountEntity entity, Optional<ContributionPolicy> policy) {
+    public void apply(AccountEntity entity, Optional<ContributionPolicy> policy) {
         if (policy.isEmpty()) {
             entity.setContributionAmountType(null);
             entity.setContributionAmountData(null);

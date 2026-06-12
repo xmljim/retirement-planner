@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.account.internal;
 
 import java.time.Instant;
 
@@ -29,7 +29,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "account_sleeve")
-class AccountSleeveEntity {
+public class AccountSleeveEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,77 +68,77 @@ class AccountSleeveEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    AccountEntity getAccount() {
+    public AccountEntity getAccount() {
         return account;
     }
 
-    void setAccount(AccountEntity account) {
+    public void setAccount(AccountEntity account) {
         this.account = account;
     }
 
-    KindType getKindType() {
+    public KindType getKindType() {
         return kindType;
     }
 
-    void setKindType(KindType kindType) {
+    public void setKindType(KindType kindType) {
         this.kindType = kindType;
     }
 
-    String getKindData() {
+    public String getKindData() {
         return kindData;
     }
 
-    void setKindData(String kindData) {
+    public void setKindData(String kindData) {
         this.kindData = kindData;
     }
 
-    YieldType getYieldType() {
+    public YieldType getYieldType() {
         return yieldType;
     }
 
-    void setYieldType(YieldType yieldType) {
+    public void setYieldType(YieldType yieldType) {
         this.yieldType = yieldType;
     }
 
-    String getYieldData() {
+    public String getYieldData() {
         return yieldData;
     }
 
-    void setYieldData(String yieldData) {
+    public void setYieldData(String yieldData) {
         this.yieldData = yieldData;
     }
 
-    MoneyEmbeddable getBalance() {
+    public MoneyEmbeddable getBalance() {
         return balance;
     }
 
-    void setBalance(MoneyEmbeddable balance) {
+    public void setBalance(MoneyEmbeddable balance) {
         this.balance = balance;
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 
-    enum KindType {
+    public enum KindType {
         CASH,
         ASSET_ALLOCATION,
         FIXED_ALLOCATION
     }
 
-    enum YieldType {
+    public enum YieldType {
         FIXED_RATE,
         MONEY_MARKET,
         TRACKS_ALLOCATION

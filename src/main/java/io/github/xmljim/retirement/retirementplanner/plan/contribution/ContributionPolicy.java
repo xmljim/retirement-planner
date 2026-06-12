@@ -3,13 +3,15 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.contribution;
 
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
 
 /**
  * Parametric description of how an {@link Account} is funded

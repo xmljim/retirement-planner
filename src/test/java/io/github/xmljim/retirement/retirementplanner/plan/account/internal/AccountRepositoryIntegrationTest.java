@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.account.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,24 +27,25 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Account;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountType;
-import io.github.xmljim.retirement.retirementplanner.plan.ContributionPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.EmployerMatch;
-import io.github.xmljim.retirement.retirementplanner.plan.EscalationPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.FilingStatus;
-import io.github.xmljim.retirement.retirementplanner.plan.FixedDollar;
-import io.github.xmljim.retirement.retirementplanner.plan.Household;
-import io.github.xmljim.retirement.retirementplanner.plan.MatchTier;
-import io.github.xmljim.retirement.retirementplanner.plan.OwnerRef;
-import io.github.xmljim.retirement.retirementplanner.plan.PercentOfSalary;
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveKind;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.account.OwnerRef;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveKind;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EmployerMatch;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EscalationPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.FixedDollar;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.MatchTier;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.PercentOfSalary;
+import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanRepositoryImpl;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
 import io.github.xmljim.retirement.retirementplanner.shared.TenantContext;
 

@@ -25,11 +25,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import io.github.xmljim.retirement.retirementplanner.plan.FilingStatus;
-import io.github.xmljim.retirement.retirementplanner.plan.Household;
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
 import io.github.xmljim.retirement.retirementplanner.shared.TenantContext;
 
 import jakarta.persistence.EntityManager;

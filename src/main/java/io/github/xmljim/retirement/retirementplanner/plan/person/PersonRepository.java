@@ -3,10 +3,12 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.person;
 
 import java.util.List;
 import java.util.Optional;
+
+import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 
 /**
  * Public repository surface for {@link Person} operations within a

@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.salary;
 
 /**
  * Strongly-typed identifier for a {@code SalaryProfile} entity (ADR-002).

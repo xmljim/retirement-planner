@@ -3,9 +3,11 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.account;
 
 import java.util.List;
+
+import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 
 /**
  * Application-level facade for the {@link Account} aggregate. Throws

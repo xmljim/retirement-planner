@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.contribution;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,6 +16,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.account.OwnerRef;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveKind;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveYieldPolicy;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
 
 class ContributionPolicyTest {

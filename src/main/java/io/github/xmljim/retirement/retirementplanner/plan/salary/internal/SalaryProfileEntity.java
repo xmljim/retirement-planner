@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.salary.internal;
 
 import java.time.Instant;
 
@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "salary_profile")
-class SalaryProfileEntity {
+public class SalaryProfileEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,19 +35,19 @@ class SalaryProfileEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 }

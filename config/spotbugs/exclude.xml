@@ -27,6 +27,19 @@
         <Class name="~.*\.(model|dto|api\.dto|shared)\..*"/>
     </Match>
 
+    <!-- JPA entities held under plan/**/internal/** carry mutable references
+         to their associated entities (Plan ↔ Person, Account ↔ Sleeve, etc.)
+         because JPA managed entities must be mutable for Hibernate to track
+         changes. The cross-aggregate getters/setters were package-private
+         pre-#89 and only became public when plan/ was subpackaged by
+         aggregate (each sub-internal/ now needs to read its sibling's
+         entity). Modulith still gates external-module access via the
+         '..internal..' package-name rule. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Class name="~io\.github\.xmljim\.retirement\.retirementplanner\.plan\.(.*\.)?internal\..*Entity"/>
+    </Match>
+
     <!-- findsecbugs SPRING_ENDPOINT flags every @RequestMapping method as
          a "Spring endpoint to audit." This codebase IS a REST API; every
          such method is intentionally exposed. Auth (S-1.8) installs a

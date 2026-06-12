@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveYieldPolicy;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.validation.constraints.NotNull;

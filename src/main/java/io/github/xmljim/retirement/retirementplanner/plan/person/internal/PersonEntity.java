@@ -3,10 +3,13 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.person.internal;
 
 import java.time.Instant;
 import java.time.LocalDate;
+
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.internal.SalaryProfileEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,7 +26,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "person")
-class PersonEntity {
+public class PersonEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,43 +49,43 @@ class PersonEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    PlanEntity getPlan() {
+    public PlanEntity getPlan() {
         return plan;
     }
 
-    void setPlan(PlanEntity plan) {
+    public void setPlan(PlanEntity plan) {
         this.plan = plan;
     }
 
-    SalaryProfileEntity getSalaryProfile() {
+    public SalaryProfileEntity getSalaryProfile() {
         return salaryProfile;
     }
 
-    void setSalaryProfile(SalaryProfileEntity salaryProfile) {
+    public void setSalaryProfile(SalaryProfileEntity salaryProfile) {
         this.salaryProfile = salaryProfile;
     }
 
-    LocalDate getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    void setDob(LocalDate dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 }

@@ -3,19 +3,19 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.account.internal;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Account;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountRepository;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountService;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountRepository;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountService;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
 import io.github.xmljim.retirement.retirementplanner.shared.NotFoundException;
 
 @Service

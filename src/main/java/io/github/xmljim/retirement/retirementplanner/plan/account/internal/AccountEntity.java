@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.account.internal;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,7 +13,9 @@ import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import io.github.xmljim.retirement.retirementplanner.plan.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.person.internal.PersonEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -32,7 +34,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "account")
-class AccountEntity {
+public class AccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,117 +87,117 @@ class AccountEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    PlanEntity getPlan() {
+    public PlanEntity getPlan() {
         return plan;
     }
 
-    void setPlan(PlanEntity plan) {
+    public void setPlan(PlanEntity plan) {
         this.plan = plan;
     }
 
-    AccountType getAccountType() {
+    public AccountType getAccountType() {
         return accountType;
     }
 
-    void setAccountType(AccountType accountType) {
+    public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
     }
 
-    OwnerType getOwnerType() {
+    public OwnerType getOwnerType() {
         return ownerType;
     }
 
-    void setOwnerType(OwnerType ownerType) {
+    public void setOwnerType(OwnerType ownerType) {
         this.ownerType = ownerType;
     }
 
-    PersonEntity getOwnerPerson() {
+    public PersonEntity getOwnerPerson() {
         return ownerPerson;
     }
 
-    void setOwnerPerson(PersonEntity ownerPerson) {
+    public void setOwnerPerson(PersonEntity ownerPerson) {
         this.ownerPerson = ownerPerson;
     }
 
-    List<AccountSleeveEntity> getSleeves() {
+    public List<AccountSleeveEntity> getSleeves() {
         return sleeves;
     }
 
-    void addSleeve(AccountSleeveEntity sleeve) {
+    public void addSleeve(AccountSleeveEntity sleeve) {
         sleeves.add(sleeve);
         sleeve.setAccount(this);
     }
 
-    ContributionAmountType getContributionAmountType() {
+    public ContributionAmountType getContributionAmountType() {
         return contributionAmountType;
     }
 
-    void setContributionAmountType(ContributionAmountType contributionAmountType) {
+    public void setContributionAmountType(ContributionAmountType contributionAmountType) {
         this.contributionAmountType = contributionAmountType;
     }
 
-    String getContributionAmountData() {
+    public String getContributionAmountData() {
         return contributionAmountData;
     }
 
-    void setContributionAmountData(String contributionAmountData) {
+    public void setContributionAmountData(String contributionAmountData) {
         this.contributionAmountData = contributionAmountData;
     }
 
-    String getEscalationData() {
+    public String getEscalationData() {
         return escalationData;
     }
 
-    void setEscalationData(String escalationData) {
+    public void setEscalationData(String escalationData) {
         this.escalationData = escalationData;
     }
 
-    String getEmployerMatchData() {
+    public String getEmployerMatchData() {
         return employerMatchData;
     }
 
-    void setEmployerMatchData(String employerMatchData) {
+    public void setEmployerMatchData(String employerMatchData) {
         this.employerMatchData = employerMatchData;
     }
 
-    LocalDate getContributionStartDate() {
+    public LocalDate getContributionStartDate() {
         return contributionStartDate;
     }
 
-    void setContributionStartDate(LocalDate contributionStartDate) {
+    public void setContributionStartDate(LocalDate contributionStartDate) {
         this.contributionStartDate = contributionStartDate;
     }
 
-    LocalDate getContributionEndDate() {
+    public LocalDate getContributionEndDate() {
         return contributionEndDate;
     }
 
-    void setContributionEndDate(LocalDate contributionEndDate) {
+    public void setContributionEndDate(LocalDate contributionEndDate) {
         this.contributionEndDate = contributionEndDate;
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 
-    enum OwnerType {
+    public enum OwnerType {
         INDIVIDUAL,
         JOINT
     }
 
-    enum ContributionAmountType {
+    public enum ContributionAmountType {
         PERCENT_OF_SALARY,
         FIXED_DOLLAR
     }

@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.person.internal;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,10 +11,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonRepository;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanJpaRepository;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonRepository;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.internal.SalaryProfileEntity;
 import io.github.xmljim.retirement.retirementplanner.shared.TenantContext;
 
 /**

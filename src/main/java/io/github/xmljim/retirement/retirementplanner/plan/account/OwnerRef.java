@@ -3,9 +3,11 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.account;
 
 import java.util.Objects;
+
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
 
 /**
  * Identifies who owns an {@link Account} — a single {@link Person} or

@@ -8,15 +8,18 @@ package io.github.xmljim.retirement.retirementplanner.plan.internal;
 import java.util.List;
 import java.util.Optional;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Household;
-import io.github.xmljim.retirement.retirementplanner.plan.HouseholdId;
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
-import io.github.xmljim.retirement.retirementplanner.plan.SalaryProfileId;
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.household.HouseholdId;
+import io.github.xmljim.retirement.retirementplanner.plan.household.internal.HouseholdEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.internal.PersonEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfileId;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.internal.SalaryProfileEntity;
 
-final class PlanMapper {
+public final class PlanMapper {
 
     private PlanMapper() {}
 

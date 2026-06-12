@@ -5,8 +5,8 @@
  */
 package io.github.xmljim.retirement.retirementplanner.api.dto;
 
-import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveId;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

@@ -3,12 +3,14 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan;
+package io.github.xmljim.retirement.retirementplanner.plan.account;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionPolicy;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
 
 /**

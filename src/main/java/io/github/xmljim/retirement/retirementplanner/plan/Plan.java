@@ -8,6 +8,9 @@ package io.github.xmljim.retirement.retirementplanner.plan;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+
 /**
  * Top-level aggregate root for retirement planning (ADR-002).
  *

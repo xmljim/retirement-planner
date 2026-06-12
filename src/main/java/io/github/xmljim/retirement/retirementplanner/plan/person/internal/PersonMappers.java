@@ -3,15 +3,15 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.person.internal;
 
 import java.util.Optional;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
-import io.github.xmljim.retirement.retirementplanner.plan.SalaryProfileId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfileId;
 
-final class PersonMappers {
+public final class PersonMappers {
 
     private PersonMappers() {}
 

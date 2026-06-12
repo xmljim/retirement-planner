@@ -3,7 +3,7 @@
  * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
  * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
  */
-package io.github.xmljim.retirement.retirementplanner.plan.internal;
+package io.github.xmljim.retirement.retirementplanner.plan.account.internal;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -18,15 +18,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Account;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
-import io.github.xmljim.retirement.retirementplanner.plan.OwnerRef;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveId;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveKind;
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
+import io.github.xmljim.retirement.retirementplanner.plan.account.OwnerRef;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveKind;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.internal.ContributionPolicyMapper;
+import io.github.xmljim.retirement.retirementplanner.plan.internal.PlanJpaRepository;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.internal.PersonEntity;
 import io.github.xmljim.retirement.retirementplanner.shared.MoneyEmbeddable;
 
 import jakarta.persistence.EntityManager;
@@ -40,7 +43,7 @@ import jakarta.persistence.PersistenceContext;
  * {@link ContributionPolicyMapper} to keep coupling within PMD limits.
  */
 @Component
-class AccountMapper {
+public class AccountMapper {
 
     private static final TypeReference<Map<String, BigDecimal>> WEIGHTS_TYPE = new TypeReference<>() {};
 
@@ -57,7 +60,7 @@ class AccountMapper {
         this.contributionPolicyMapper = contributionPolicyMapper;
     }
 
-    Account toRecord(AccountEntity entity) {
+    public Account toRecord(AccountEntity entity) {
         OwnerRef owner = entity.getOwnerType() == AccountEntity.OwnerType.JOINT
                 ? new OwnerRef.Joint()
                 : new OwnerRef.Individual(new PersonId(entity.getOwnerPerson().getId()));
@@ -72,14 +75,14 @@ class AccountMapper {
                 contributionPolicyMapper.toRecord(entity));
     }
 
-    AccountEntity toEntity(Account account) {
+    public AccountEntity toEntity(Account account) {
         AccountEntity entity = new AccountEntity();
         applyAccountScalars(entity, account);
         account.sleeves().forEach(sleeve -> entity.addSleeve(toSleeveEntity(sleeve)));
         return entity;
     }
 
-    void applyAccountScalars(AccountEntity entity, Account account) {
+    public void applyAccountScalars(AccountEntity entity, Account account) {
         entity.setPlan(planJpa.getReferenceById(account.planId().value()));
         entity.setAccountType(account.type());
         switch (account.owner()) {
@@ -118,7 +121,7 @@ class AccountMapper {
                 yieldPolicy);
     }
 
-    AccountSleeveEntity toSleeveEntity(AccountSleeve sleeve) {
+    public AccountSleeveEntity toSleeveEntity(AccountSleeve sleeve) {
         AccountSleeveEntity entity = new AccountSleeveEntity();
         switch (sleeve.kind()) {
             case SleeveKind.Cash _ -> {

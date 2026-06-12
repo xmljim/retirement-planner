@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import io.github.xmljim.retirement.retirementplanner.plan.ContributionAmount;
-import io.github.xmljim.retirement.retirementplanner.plan.FixedDollar;
-import io.github.xmljim.retirement.retirementplanner.plan.PercentOfSalary;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionAmount;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.FixedDollar;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.PercentOfSalary;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.validation.Valid;
