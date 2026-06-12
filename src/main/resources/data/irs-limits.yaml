@@ -1,0 +1,37 @@
+---
+projection:
+  contributionLimitGrowthRate: "0.025"
+years:
+- year: 2024
+  employee401kBase: 23000
+  employee401k50PlusCatchup: 7500
+  employee401k60PlusCatchup: 7500
+  iraBase: 7000
+  ira50PlusCatchup: 1000
+  hsaSelfOnly: 4150
+  hsaFamily: 8300
+  hsa55PlusCatchup: 1000
+  totalDc: 69000
+  secure2_0_603HighEarnerThreshold: 145000
+- year: 2025
+  employee401kBase: 23500
+  employee401k50PlusCatchup: 7500
+  employee401k60PlusCatchup: 11250
+  iraBase: 7000
+  ira50PlusCatchup: 1000
+  hsaSelfOnly: 4300
+  hsaFamily: 8550
+  hsa55PlusCatchup: 1000
+  totalDc: 70000
+  secure2_0_603HighEarnerThreshold: 145000
+- year: 2026
+  employee401kBase: 24500
+  employee401k50PlusCatchup: 8000
+  employee401k60PlusCatchup: 11250
+  iraBase: 7500
+  ira50PlusCatchup: 1000
+  hsaSelfOnly: 4400
+  hsaFamily: 8750
+  hsa55PlusCatchup: 1000
+  totalDc: 72000
+  secure2_0_603HighEarnerThreshold: 150000

@@ -55,6 +55,18 @@
         <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION"/>
     </Match>
 
+    <!-- IrsLimitsServiceImpl logs only internally-derived values (year
+         numbers and growth rate parsed from a bundled, repo-controlled
+         YAML), so findsecbugs's CRLF_INJECTION_LOGS advisory is a false
+         positive. Its constructor throws on bundled-resource parse
+         failure, which correctly aborts Spring context startup; the
+         CT_CONSTRUCTOR_THROW finalizer-attack vector is not applicable
+         (no finalizer, no security-sensitive partial state). -->
+    <Match>
+        <Class name="io.github.xmljim.retirement.retirementplanner.contribution.internal.IrsLimitsServiceImpl"/>
+        <Bug pattern="CRLF_INJECTION_LOGS,CT_CONSTRUCTOR_THROW"/>
+    </Match>
+
     <!-- StubAuthenticationToken is created per-request and never stored
          in a session (stateless SessionCreationPolicy in SecurityConfig).
          Spring Security's AbstractAuthenticationToken implements
