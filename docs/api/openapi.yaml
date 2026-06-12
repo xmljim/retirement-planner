@@ -504,6 +504,8 @@ components:
           enum:
           - TRADITIONAL_401K
           - ROTH_401K
+          - TRADITIONAL_403B
+          - ROTH_403B
           - TRADITIONAL_IRA
           - ROTH_IRA
           - HSA
@@ -517,6 +519,8 @@ components:
           items:
             $ref: "#/components/schemas/AccountSleeveDto"
           minItems: 1
+        contributionPolicy:
+          $ref: "#/components/schemas/ContributionPolicyDto"
       required:
       - owner
       - sleeves
@@ -543,6 +547,54 @@ components:
     Cash:
       allOf:
       - $ref: "#/components/schemas/SleeveKindDto"
+    ContributionAmountDto:
+      description: Employee contribution amount on a ContributionPolicy.
+      discriminator:
+        propertyName: type
+      oneOf:
+      - $ref: "#/components/schemas/PercentOfSalaryDto"
+      - $ref: "#/components/schemas/FixedDollarDto"
+      properties:
+        type:
+          type: string
+      required:
+      - type
+    ContributionPolicyDto:
+      type: object
+      properties:
+        employee:
+          $ref: "#/components/schemas/ContributionAmountDto"
+        escalation:
+          $ref: "#/components/schemas/EscalationPolicyDto"
+        match:
+          $ref: "#/components/schemas/EmployerMatchDto"
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+      required:
+      - employee
+    EmployerMatchDto:
+      type: object
+      properties:
+        tiers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchTierDto"
+      required:
+      - tiers
+    EscalationPolicyDto:
+      type: object
+      properties:
+        annualIncrease:
+          type: number
+        cap:
+          type: number
+      required:
+      - annualIncrease
+      - cap
     FixedAllocation:
       allOf:
       - $ref: "#/components/schemas/SleeveKindDto"
@@ -555,6 +607,15 @@ components:
             minProperties: 1
       required:
       - weights
+    FixedDollarDto:
+      allOf:
+      - $ref: "#/components/schemas/ContributionAmountDto"
+      - type: object
+        properties:
+          annualAmount:
+            $ref: "#/components/schemas/MoneyDto"
+      required:
+      - annualAmount
     FixedRate:
       allOf:
       - $ref: "#/components/schemas/SleeveYieldPolicyDto"
@@ -577,6 +638,16 @@ components:
     Joint:
       allOf:
       - $ref: "#/components/schemas/OwnerRefDto"
+    MatchTierDto:
+      type: object
+      properties:
+        employeeContribPctUpTo:
+          type: number
+        matchPct:
+          type: number
+      required:
+      - employeeContribPctUpTo
+      - matchPct
     MoneyDto:
       type: object
       properties:
@@ -604,6 +675,15 @@ components:
           type: string
       required:
       - type
+    PercentOfSalaryDto:
+      allOf:
+      - $ref: "#/components/schemas/ContributionAmountDto"
+      - type: object
+        properties:
+          pct:
+            type: number
+      required:
+      - pct
     SleeveKindDto:
       description: Sleeve allocation behavior.
       discriminator:
