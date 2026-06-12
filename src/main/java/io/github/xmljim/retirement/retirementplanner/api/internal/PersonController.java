@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.github.xmljim.retirement.retirementplanner.api.PersonOperations;
 import io.github.xmljim.retirement.retirementplanner.api.dto.PersonDto;
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonService;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonService;
 
 @RestController
 class PersonController implements PersonOperations {

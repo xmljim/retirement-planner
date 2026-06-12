@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Spring Data interface for {@link PlanEntity}; tenant filtering happens above this layer. */
-interface PlanJpaRepository extends JpaRepository<PlanEntity, Long> {
+public interface PlanJpaRepository extends JpaRepository<PlanEntity, Long> {
 
     Optional<PlanEntity> findByIdAndTenantId(Long id, long tenantId);
 

@@ -11,7 +11,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import io.github.xmljim.retirement.retirementplanner.plan.SleeveKind;
+import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveKind;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.validation.constraints.NotEmpty;

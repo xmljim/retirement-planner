@@ -7,9 +7,9 @@ package io.github.xmljim.retirement.retirementplanner.api.dto;
 
 import java.time.LocalDate;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Person;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
-import io.github.xmljim.retirement.retirementplanner.plan.SalaryProfileId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfileId;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;

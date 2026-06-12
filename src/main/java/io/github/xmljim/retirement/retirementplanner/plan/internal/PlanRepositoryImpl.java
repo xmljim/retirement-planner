@@ -22,7 +22,7 @@ import io.github.xmljim.retirement.retirementplanner.shared.TenantContext;
  * cross-tenant reads are not reachable from this surface.
  */
 @Repository
-class PlanRepositoryImpl implements PlanRepository {
+public class PlanRepositoryImpl implements PlanRepository {
 
     private final PlanJpaRepository jpa;
     private final TenantContext tenantContext;

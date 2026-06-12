@@ -14,6 +14,13 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.household.HouseholdId;
+import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfileId;
+
 class PlanRecordsTest {
 
     @Test

@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.xmljim.retirement.retirementplanner.api.AccountOperations;
 import io.github.xmljim.retirement.retirementplanner.api.dto.AccountDto;
 import io.github.xmljim.retirement.retirementplanner.api.dto.AccountSleeveDto;
-import io.github.xmljim.retirement.retirementplanner.plan.Account;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountService;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountService;
 
 @RestController
 class AccountController implements AccountOperations {

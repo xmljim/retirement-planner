@@ -10,10 +10,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import io.github.xmljim.retirement.retirementplanner.plan.ContributionPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.EmployerMatch;
-import io.github.xmljim.retirement.retirementplanner.plan.EscalationPolicy;
-import io.github.xmljim.retirement.retirementplanner.plan.MatchTier;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EmployerMatch;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EscalationPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.MatchTier;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

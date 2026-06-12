@@ -5,9 +5,9 @@
  */
 package io.github.xmljim.retirement.retirementplanner.api.dto;
 
-import io.github.xmljim.retirement.retirementplanner.plan.FilingStatus;
-import io.github.xmljim.retirement.retirementplanner.plan.Household;
-import io.github.xmljim.retirement.retirementplanner.plan.HouseholdId;
+import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
+import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
+import io.github.xmljim.retirement.retirementplanner.plan.household.HouseholdId;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

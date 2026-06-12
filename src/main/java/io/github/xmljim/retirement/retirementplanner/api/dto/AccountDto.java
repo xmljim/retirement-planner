@@ -8,10 +8,10 @@ package io.github.xmljim.retirement.retirementplanner.api.dto;
 import java.util.List;
 import java.util.Optional;
 
-import io.github.xmljim.retirement.retirementplanner.plan.Account;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
-import io.github.xmljim.retirement.retirementplanner.plan.AccountType;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

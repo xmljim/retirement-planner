@@ -8,8 +8,8 @@ package io.github.xmljim.retirement.retirementplanner.api.dto;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import io.github.xmljim.retirement.retirementplanner.plan.OwnerRef;
-import io.github.xmljim.retirement.retirementplanner.plan.PersonId;
+import io.github.xmljim.retirement.retirementplanner.plan.account.OwnerRef;
+import io.github.xmljim.retirement.retirementplanner.plan.person.PersonId;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.validation.constraints.NotNull;

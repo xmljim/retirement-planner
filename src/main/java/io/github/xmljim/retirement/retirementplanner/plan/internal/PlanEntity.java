@@ -9,6 +9,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.xmljim.retirement.retirementplanner.plan.household.internal.HouseholdEntity;
+import io.github.xmljim.retirement.retirementplanner.plan.person.internal.PersonEntity;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +26,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "plan")
-class PlanEntity {
+public class PlanEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,47 +47,47 @@ class PlanEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    Long getId() {
+    public Long getId() {
         return id;
     }
 
-    long getTenantId() {
+    public long getTenantId() {
         return tenantId;
     }
 
-    void setTenantId(long tenantId) {
+    public void setTenantId(long tenantId) {
         this.tenantId = tenantId;
     }
 
-    HouseholdEntity getHousehold() {
+    public HouseholdEntity getHousehold() {
         return household;
     }
 
-    void setHousehold(HouseholdEntity household) {
+    public void setHousehold(HouseholdEntity household) {
         this.household = household;
         if (household != null) {
             household.setPlan(this);
         }
     }
 
-    List<PersonEntity> getPersons() {
+    public List<PersonEntity> getPersons() {
         return persons;
     }
 
-    void addPerson(PersonEntity person) {
+    public void addPerson(PersonEntity person) {
         persons.add(person);
         person.setPlan(this);
     }
 
     @PrePersist
-    void onCreate() {
+    public void onCreate() {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
     }
 
     @PreUpdate
-    void onUpdate() {
+    public void onUpdate() {
         updatedAt = Instant.now();
     }
 }
