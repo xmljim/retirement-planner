@@ -40,6 +40,11 @@ management:
 app:
   auth:
     mode: passkey
+  cors:
+    # Production deploys must set APP_CORS_ALLOWED_ORIGINS to a
+    # comma-separated list of trusted origins. SecurityConfig fails
+    # fast at startup if this is empty in non-stub mode.
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:}
   blobstore:
     type: ${APP_BLOBSTORE_TYPE:filesystem}
     root: ${RETIREMENT_DATA_DIR:/var/lib/retirement-planner/blobs}

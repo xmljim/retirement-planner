@@ -36,3 +36,9 @@ management:
     web:
       exposure:
         include: health,info,modulith,prometheus
+
+app:
+  cors:
+    # React dev server (Vite default port).
+    allowed-origins:
+      - http://localhost:5173

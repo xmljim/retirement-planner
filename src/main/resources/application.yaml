@@ -26,9 +26,21 @@ springdoc:
 # ADR-006 (BlobStore), ADR-008 (Modulith).
 app:
   auth:
-    # Mode: stub | passkey. Stub injects a single 'owner' principal
-    # for solo development. Passkey lands in S-1.8 / EPIC-8.
+    # Mode: stub | passkey. Stub installs a fixed solo principal for
+    # local development and integration tests; passkey is a placeholder
+    # until EPIC-8 wires WebAuthn. Profiles override as needed.
     mode: stub
+    solo-principal: owner
+  cors:
+    # Strict allowlist is the defense-in-depth layer for browser-
+    # mediated token replay. Empty in defaults; profiles populate
+    # actual origins. Container deploys can override via
+    # APP_CORS_ALLOWED_ORIGINS (comma-separated).
+    allowed-origins: []
+    allowed-methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+    allowed-headers: ["*"]
+    allow-credentials: false
+    max-age: 1h
   blobstore:
     # Local filesystem implementation per ADR-006. SaaS phase swaps
     # to S3/GCS/Azure-Blob; the interface stays the same.
