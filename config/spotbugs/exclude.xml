@@ -26,4 +26,15 @@
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
         <Class name="~.*\.(model|dto|api\.dto|shared)\..*"/>
     </Match>
+
+    <!-- findsecbugs SPRING_ENDPOINT flags every @RequestMapping method as
+         a "Spring endpoint to audit." This codebase IS a REST API; every
+         such method is intentionally exposed. Auth lands in S-1.8; CSRF
+         concerns are addressed by the auth/session strategy there, not
+         per-endpoint. The advisory is duplicated for *Operations
+         interfaces and their *Controller impls, doubling the noise. -->
+    <Match>
+        <Bug pattern="SPRING_ENDPOINT"/>
+        <Class name="~io\.github\.xmljim\.retirement\.retirementplanner\.api\..*"/>
+    </Match>
 </FindBugsFilter>

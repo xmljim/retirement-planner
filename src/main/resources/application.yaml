@@ -16,6 +16,12 @@ management:
     health:
       show-details: when-authorized
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
 # Application-specific configuration. See ADR-001 (auth modes),
 # ADR-006 (BlobStore), ADR-008 (Modulith).
 app:

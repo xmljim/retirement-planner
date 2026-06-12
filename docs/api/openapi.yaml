@@ -1,0 +1,635 @@
+openapi: 3.1.0
+info:
+  title: Retirement Planner API
+  description: REST surface for the retirement planner backend.
+  version: v0
+servers:
+- url: /
+  description: Relative to the deployment host
+tags:
+- name: Accounts
+  description: Tax-advantaged or taxable accounts within a Plan
+- name: Plans
+  description: Top-level retirement plan aggregates
+- name: Persons
+  description: Persons (spouses) within a Plan's Household
+paths:
+  /api/v1/plans/{id}:
+    get:
+      tags:
+      - Plans
+      summary: Fetch a Plan by id
+      operationId: findById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Plan found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanDto"
+        "404":
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    put:
+      tags:
+      - Plans
+      summary: Replace a Plan's household scalars
+      operationId: replace
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanDto"
+        required: true
+      responses:
+        "200":
+          description: Plan replaced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanDto"
+        "404":
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    delete:
+      tags:
+      - Plans
+      summary: Delete a Plan by id (cascades to Persons and Accounts)
+      operationId: deleteById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted (or absent)
+  /api/v1/persons/{id}:
+    get:
+      tags:
+      - Persons
+      summary: Fetch a Person by id
+      operationId: findById_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Person found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonDto"
+        "404":
+          description: Person not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    put:
+      tags:
+      - Persons
+      summary: Replace a Person's scalars (e.g. dob)
+      operationId: replace_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonDto"
+        required: true
+      responses:
+        "200":
+          description: Person replaced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonDto"
+        "404":
+          description: Person not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    delete:
+      tags:
+      - Persons
+      summary: Delete a Person by id (refuses to remove the last Person from a Plan)
+      operationId: deleteById_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted (or absent)
+        "400":
+          description: Cannot delete the last Person from a Plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/accounts/{id}:
+    get:
+      tags:
+      - Accounts
+      summary: Fetch an Account by id
+      operationId: findById_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Account found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDto"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    put:
+      tags:
+      - Accounts
+      summary: Replace an Account in place (sleeves replaced wholesale)
+      operationId: replace_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountDto"
+        required: true
+      responses:
+        "200":
+          description: Account replaced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDto"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    delete:
+      tags:
+      - Accounts
+      summary: Delete an Account by id (cascades to sleeves)
+      operationId: deleteById_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted (or absent)
+  /api/v1/plans:
+    get:
+      tags:
+      - Plans
+      summary: List all Plans visible in the active tenant
+      operationId: findAll
+      responses:
+        "200":
+          description: List of plans (possibly empty)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlanDto"
+    post:
+      tags:
+      - Plans
+      summary: Create a Plan in the active tenant
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlanDto"
+        required: true
+      responses:
+        "201":
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanDto"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/plans/{planId}/persons:
+    get:
+      tags:
+      - Persons
+      summary: List all Persons in a Plan
+      operationId: findByPlanId
+      parameters:
+      - name: planId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: List of persons (1 or 2 entries)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PersonDto"
+        "404":
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    post:
+      tags:
+      - Persons
+      summary: Add a Person to a Plan (max 2)
+      operationId: add
+      parameters:
+      - name: planId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonDto"
+        required: true
+      responses:
+        "201":
+          description: Person created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonDto"
+        "400":
+          description: Validation failed or Plan already has 2 persons
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/plans/{planId}/accounts:
+    get:
+      tags:
+      - Accounts
+      summary: List all Accounts in a Plan
+      operationId: findByPlanId_1
+      parameters:
+      - name: planId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: List of accounts (possibly empty)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountDto"
+    post:
+      tags:
+      - Accounts
+      summary: Create an Account under a Plan
+      operationId: create_1
+      parameters:
+      - name: planId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountDto"
+        required: true
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDto"
+        "400":
+          description: Validation failed or parent Plan not in active tenant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/accounts/{id}/sleeves:
+    get:
+      tags:
+      - Accounts
+      summary: List the Sleeves of an Account
+      operationId: findSleeves
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: List of sleeves
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountSleeveDto"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+components:
+  schemas:
+    HouseholdDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        filingStatus:
+          type: string
+          enum:
+          - SINGLE
+          - MARRIED_FILING_JOINTLY
+          - MARRIED_FILING_SEPARATELY
+          - HEAD_OF_HOUSEHOLD
+          - QUALIFYING_SURVIVING_SPOUSE
+        state:
+          type: string
+          pattern: "[A-Z]{2}"
+      required:
+      - filingStatus
+      - state
+    PersonDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        salaryProfileId:
+          type: integer
+          format: int64
+        dob:
+          type: string
+          format: date
+      required:
+      - dob
+    PlanDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        tenantId:
+          type: integer
+          format: int64
+        household:
+          $ref: "#/components/schemas/HouseholdDto"
+        persons:
+          type: array
+          items:
+            $ref: "#/components/schemas/PersonDto"
+          maxItems: 2
+          minItems: 0
+      required:
+      - household
+      - persons
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        properties:
+          type: object
+          additionalProperties: {}
+    AccountDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        planId:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum:
+          - TRADITIONAL_401K
+          - ROTH_401K
+          - TRADITIONAL_IRA
+          - ROTH_IRA
+          - HSA
+          - TAXABLE_BROKERAGE
+          - CASH
+          - PENSION
+        owner:
+          $ref: "#/components/schemas/OwnerRefDto"
+        sleeves:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountSleeveDto"
+          minItems: 1
+      required:
+      - owner
+      - sleeves
+      - type
+    AccountSleeveDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        kind:
+          $ref: "#/components/schemas/SleeveKindDto"
+        balance:
+          $ref: "#/components/schemas/MoneyDto"
+        yieldPolicy:
+          $ref: "#/components/schemas/SleeveYieldPolicyDto"
+      required:
+      - balance
+      - kind
+      - yieldPolicy
+    AssetAllocation:
+      allOf:
+      - $ref: "#/components/schemas/SleeveKindDto"
+    Cash:
+      allOf:
+      - $ref: "#/components/schemas/SleeveKindDto"
+    FixedAllocation:
+      allOf:
+      - $ref: "#/components/schemas/SleeveKindDto"
+      - type: object
+        properties:
+          weights:
+            type: object
+            additionalProperties:
+              type: number
+            minProperties: 1
+      required:
+      - weights
+    FixedRate:
+      allOf:
+      - $ref: "#/components/schemas/SleeveYieldPolicyDto"
+      - type: object
+        properties:
+          annualRate:
+            type: number
+      required:
+      - annualRate
+    Individual:
+      allOf:
+      - $ref: "#/components/schemas/OwnerRefDto"
+      - type: object
+        properties:
+          personId:
+            type: integer
+            format: int64
+      required:
+      - personId
+    Joint:
+      allOf:
+      - $ref: "#/components/schemas/OwnerRefDto"
+    MoneyDto:
+      type: object
+      properties:
+        amount:
+          type: string
+          pattern: -?\d+(\.\d+)?
+        currency:
+          type: string
+          pattern: "[A-Z]{3}"
+      required:
+      - amount
+      - currency
+    MoneyMarket:
+      allOf:
+      - $ref: "#/components/schemas/SleeveYieldPolicyDto"
+    OwnerRefDto:
+      description: "Account owner. Either INDIVIDUAL with a personId, or JOINT."
+      discriminator:
+        propertyName: type
+      oneOf:
+      - $ref: "#/components/schemas/Individual"
+      - $ref: "#/components/schemas/Joint"
+      properties:
+        type:
+          type: string
+      required:
+      - type
+    SleeveKindDto:
+      description: Sleeve allocation behavior.
+      discriminator:
+        propertyName: type
+      oneOf:
+      - $ref: "#/components/schemas/Cash"
+      - $ref: "#/components/schemas/AssetAllocation"
+      - $ref: "#/components/schemas/FixedAllocation"
+      properties:
+        type:
+          type: string
+      required:
+      - type
+    SleeveYieldPolicyDto:
+      description: Yield model applied to a sleeve's balance.
+      discriminator:
+        propertyName: type
+      oneOf:
+      - $ref: "#/components/schemas/FixedRate"
+      - $ref: "#/components/schemas/MoneyMarket"
+      - $ref: "#/components/schemas/TracksAllocation"
+      properties:
+        type:
+          type: string
+      required:
+      - type
+    TracksAllocation:
+      allOf:
+      - $ref: "#/components/schemas/SleeveYieldPolicyDto"

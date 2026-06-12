@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2026 Jim Earley. All rights reserved.
+ * Licensed under PolyForm Noncommercial 1.0.0 plus the project's
+ * AI-training restriction. See LICENSE and LICENSE-ADDENDUM.md.
+ */
+package io.github.xmljim.retirement.retirementplanner.plan.internal;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import io.github.xmljim.retirement.retirementplanner.plan.Account;
+import io.github.xmljim.retirement.retirementplanner.plan.AccountId;
+import io.github.xmljim.retirement.retirementplanner.plan.AccountRepository;
+import io.github.xmljim.retirement.retirementplanner.plan.AccountService;
+import io.github.xmljim.retirement.retirementplanner.plan.AccountSleeve;
+import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
+import io.github.xmljim.retirement.retirementplanner.shared.NotFoundException;
+
+@Service
+class AccountServiceImpl implements AccountService {
+
+    private final AccountRepository repository;
+
+    AccountServiceImpl(AccountRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public Account create(PlanId planId, Account account) {
+        Account stamped = Account.of(planId, account.type(), account.owner(), account.sleeves());
+        return repository.save(stamped);
+    }
+
+    @Override
+    public Account findById(AccountId id) {
+        return repository.findById(id).orElseThrow(() -> notFound(id));
+    }
+
+    @Override
+    public List<Account> findByPlanId(PlanId planId) {
+        return repository.findByPlanId(planId);
+    }
+
+    @Override
+    public List<AccountSleeve> findSleevesByAccountId(AccountId id) {
+        return findById(id).sleeves();
+    }
+
+    @Override
+    public Account replace(AccountId id, Account replacement) {
+        Account existing = repository.findById(id).orElseThrow(() -> notFound(id));
+        Account merged = new Account(
+                existing.id(), existing.planId(), replacement.type(), replacement.owner(), replacement.sleeves());
+        return repository.save(merged);
+    }
+
+    @Override
+    public void deleteById(AccountId id) {
+        repository.deleteById(id);
+    }
+
+    private static NotFoundException notFound(AccountId id) {
+        return new NotFoundException("Account " + id.value() + " not found");
+    }
+}
