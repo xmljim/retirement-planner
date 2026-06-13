@@ -314,8 +314,8 @@ class AccountRepositoryIntegrationTest {
         ContributionPolicy policy = new ContributionPolicy(
                 new PercentOfSalary(new BigDecimal(FIVE_PCT)),
                 Optional.empty(),
-                Optional.of(new EmployerMatch(
-                        List.of(new MatchTier(new BigDecimal("0.03"), new BigDecimal("1.00"))), true)),
+                Optional.of(
+                        EmployerMatch.ofRoth(List.of(new MatchTier(new BigDecimal("0.03"), new BigDecimal("1.00"))))),
                 Optional.empty(),
                 Optional.empty());
 

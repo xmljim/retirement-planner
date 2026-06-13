@@ -180,7 +180,7 @@ class Section604EngineTest {
         // but with §604 elected. Trimmer must include EMPLOYER_MATCH_ROTH in §415(c) kind set.
         SalaryProfile salary = salary(MID_SALARY);
         EmployerMatch lavishMatch =
-                new EmployerMatch(List.of(new MatchTier(new BigDecimal("0.50"), new BigDecimal("2.00"))), true);
+                EmployerMatch.ofRoth(List.of(new MatchTier(new BigDecimal("0.50"), new BigDecimal("2.00"))));
         Account account = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(new BigDecimal("0.50"), lavishMatch));
 
         CashFlowLedger ledger = runYear(person(40), List.of(account), salary, YEAR_2026);
@@ -207,7 +207,7 @@ class Section604EngineTest {
         //   - traditional source: EMPLOYEE_PRETAX (base) + EMPLOYER_MATCH_ROTH (§604), no EMPLOYER_MATCH
         //   - Roth target: EMPLOYEE_ROTH_CATCHUP (§603-routed)
         SalaryProfile salary = highEarnerSalary(WAGES_ABOVE_THRESHOLD);
-        EmployerMatch rothMatch = new EmployerMatch(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)), true);
+        EmployerMatch rothMatch = EmployerMatch.ofRoth(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)));
         Account trad = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(TEN_PCT, rothMatch));
         Account roth = account(2L, AccountType.ROTH_401K, percentPolicy(BigDecimal.ZERO, null));
 
@@ -243,11 +243,9 @@ class Section604EngineTest {
     }
 
     private static EmployerMatch simpleMatch(boolean asRoth) {
-        return new EmployerMatch(
-                List.of(
-                        new MatchTier(new BigDecimal("0.03"), HUNDRED_PCT),
-                        new MatchTier(new BigDecimal("0.05"), HALF)),
-                asRoth);
+        List<MatchTier> tiers = List.of(
+                new MatchTier(new BigDecimal("0.03"), HUNDRED_PCT), new MatchTier(new BigDecimal("0.05"), HALF));
+        return asRoth ? EmployerMatch.ofRoth(tiers) : EmployerMatch.of(tiers);
     }
 
     private static SalaryProfile salary(int annual) {

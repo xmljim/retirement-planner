@@ -56,6 +56,11 @@ public record EmployerMatch(List<MatchTier> tiers, boolean asRoth) {
         return new EmployerMatch(tiers, false);
     }
 
+    /** Convenience constructor for a §604-elected (Roth-treated) match. */
+    public static EmployerMatch ofRoth(List<MatchTier> tiers) {
+        return new EmployerMatch(tiers, true);
+    }
+
     /**
      * Returns the employer-match rate (a fraction of salary) earned by
      * an employee contributing {@code employeePct} of salary. The result
