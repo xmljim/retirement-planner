@@ -44,7 +44,8 @@ Top-level Java packages, each a Modulith module:
 ```
 io.github.xmljim.retirement.retirementplanner
 ├── plan/                     # Plan, Household, Person, Account, Sleeve aggregates
-├── contribution/             # Accumulation engine, ContributionPolicy, IRS limits, §603/§604 routing
+├── contribution/             # Accumulation engine: contributions, IRS limits, §603/§604 routing
+├── accumulation/             # Accumulation engine: per-month sleeve yield (S-2.7), projector (S-2.8)
 ├── tax/                      # TaxEngine, brackets, RMDs, Roth conversions, taxable SS
 ├── bucket/                   # Bucket interface, FundingPolicy, SpendingPolicy, LifecyclePolicy
 ├── allocation/               # AssetAllocationPolicy, glide path, asset classes
@@ -103,6 +104,7 @@ Most modules own one or more aggregate roots from ADR-002:
 |---|---|---|
 | plan | Plan, Household, Person, Account, Sleeve | `PlanRepository`, value records |
 | contribution | (no aggregates; engine-only) | `ContributionEngine` interface |
+| accumulation | (no aggregates; engine-only) | `SleeveYieldEngine` interface (S-2.7); projector (S-2.8) |
 | tax | (no aggregates; engine-only) | `TaxEngine` interface, `TaxResult` |
 | bucket | (Bucket types are owned by `plan`; engine-only here) | `BucketEngine`, `SpendingPolicy` types |
 | allocation | AssetAllocationPolicy | `AllocationPolicy` interface |

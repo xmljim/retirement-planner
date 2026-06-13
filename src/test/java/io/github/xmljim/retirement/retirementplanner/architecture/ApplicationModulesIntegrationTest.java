@@ -24,13 +24,13 @@ class ApplicationModulesIntegrationTest {
     }
 
     @Test
-    @DisplayName("project declares exactly 10 top-level modules (ADR-008)")
+    @DisplayName("project declares exactly 11 top-level modules (ADR-008)")
     void modulesAreInspectable() {
-        // Per ADR-008, the project declares 10 top-level modules. New
+        // Per ADR-008, the project declares 11 top-level modules. New
         // modules require an ADR amendment, so this assertion is
         // intentionally exact: drift means someone moved something
         // without updating the architectural contract.
         var modules = ApplicationModules.of(RetirementPlannerApplication.class);
-        assertThat(modules.stream().count()).isEqualTo(10);
+        assertThat(modules.stream().count()).isEqualTo(11);
     }
 }

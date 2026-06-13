@@ -191,6 +191,33 @@ class AccountRepositoryIntegrationTest {
     }
 
     @Test
+    @DisplayName("MoneyMarket currentRate round-trips through JSONB")
+    void moneyMarketRoundTripsThroughJsonb() {
+        whenTenantIs(SOLO_TENANT);
+        Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "TX");
+
+        AccountSleeve cash = AccountSleeve.of(
+                new SleeveKind.Cash(),
+                Money.usd("5000.00"),
+                new SleeveYieldPolicy.MoneyMarket(new BigDecimal("0.0525")));
+
+        Account saved = repository.save(Account.of(
+                plan.id().orElseThrow(),
+                AccountType.TRADITIONAL_IRA,
+                new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
+                List.of(cash)));
+
+        AccountSleeve reloadedSleeve = repository
+                .findById(saved.id().orElseThrow())
+                .orElseThrow()
+                .sleeves()
+                .get(0);
+        assertThat(reloadedSleeve.yieldPolicy()).isInstanceOf(SleeveYieldPolicy.MoneyMarket.class);
+        assertThat(((SleeveYieldPolicy.MoneyMarket) reloadedSleeve.yieldPolicy()).currentRate())
+                .isEqualByComparingTo(new BigDecimal("0.0525"));
+    }
+
+    @Test
     @DisplayName("findById is scoped to active tenant — other tenants invisible")
     void findByIdIsTenantScoped() {
         long otherTenant = lookupTenantIdBySlug(OTHER_TENANT_SLUG);
@@ -233,7 +260,7 @@ class AccountRepositoryIntegrationTest {
                         AccountSleeve.of(
                                 new SleeveKind.Cash(),
                                 Money.usd(SLEEVE_AMOUNT_CENTS),
-                                new SleeveYieldPolicy.MoneyMarket()),
+                                new SleeveYieldPolicy.MoneyMarket(new BigDecimal("0.045"))),
                         AccountSleeve.of(
                                 new SleeveKind.AssetAllocation(),
                                 Money.usd("900.00"),

@@ -73,7 +73,7 @@ class AccountRecordsTest {
     void accountSleeveRejectsNulls() {
         Money one = Money.usd("1.00");
         SleeveKind cash = new SleeveKind.Cash();
-        SleeveYieldPolicy mm = new SleeveYieldPolicy.MoneyMarket();
+        SleeveYieldPolicy mm = new SleeveYieldPolicy.MoneyMarket(new BigDecimal("0.045"));
         assertThatThrownBy(() -> AccountSleeve.of(null, one, mm)).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> AccountSleeve.of(cash, null, mm)).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> AccountSleeve.of(cash, one, null)).isInstanceOf(NullPointerException.class);
@@ -105,6 +105,12 @@ class AccountRecordsTest {
     @DisplayName("SleeveYieldPolicy.FixedRate rejects null annual rate")
     void fixedRateRejectsNullRate() {
         assertThatThrownBy(() -> new SleeveYieldPolicy.FixedRate(null)).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("SleeveYieldPolicy.MoneyMarket rejects null current rate")
+    void moneyMarketRejectsNullRate() {
+        assertThatThrownBy(() -> new SleeveYieldPolicy.MoneyMarket(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test

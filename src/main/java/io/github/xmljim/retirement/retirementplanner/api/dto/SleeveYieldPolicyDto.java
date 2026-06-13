@@ -22,7 +22,7 @@ import jakarta.validation.constraints.NotNull;
  * <p>Wire shapes:
  * <pre>{@code
  *   {"type":"FIXED_RATE","annualRate":"0.045"}
- *   {"type":"MONEY_MARKET"}
+ *   {"type":"MONEY_MARKET","currentRate":"0.045"}
  *   {"type":"TRACKS_ALLOCATION"}
  * }</pre>
  */
@@ -45,7 +45,7 @@ public sealed interface SleeveYieldPolicyDto {
     static SleeveYieldPolicyDto from(SleeveYieldPolicy policy) {
         return switch (policy) {
             case SleeveYieldPolicy.FixedRate fr -> new FixedRate(fr.annualRate());
-            case SleeveYieldPolicy.MoneyMarket _ -> new MoneyMarket();
+            case SleeveYieldPolicy.MoneyMarket mm -> new MoneyMarket(mm.currentRate());
             case SleeveYieldPolicy.TracksAllocation _ -> new TracksAllocation();
         };
     }
@@ -59,10 +59,10 @@ public sealed interface SleeveYieldPolicyDto {
         }
     }
 
-    record MoneyMarket() implements SleeveYieldPolicyDto {
+    record MoneyMarket(@NotNull BigDecimal currentRate) implements SleeveYieldPolicyDto {
         @Override
         public SleeveYieldPolicy toSleeveYieldPolicy() {
-            return new SleeveYieldPolicy.MoneyMarket();
+            return new SleeveYieldPolicy.MoneyMarket(currentRate);
         }
     }
 

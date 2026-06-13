@@ -26,8 +26,18 @@ public sealed interface SleeveYieldPolicy {
         }
     }
 
-    /** Yield indexed to a money-market reference rate resolved at runtime. */
-    record MoneyMarket() implements SleeveYieldPolicy {}
+    /**
+     * Yield from a money-market / cash-sweep sleeve held inside a
+     * wrapper account (an IRA or 401(k) commonly carries idle cash at
+     * a sweep rate). The rate is the sleeve's current quoted annual
+     * yield; callers update it as part of normal scenario maintenance.
+     */
+    record MoneyMarket(BigDecimal currentRate) implements SleeveYieldPolicy {
+
+        public MoneyMarket {
+            Objects.requireNonNull(currentRate, "currentRate");
+        }
+    }
 
     /** Yield derived from the sleeve's {@link SleeveKind} allocation and the asset-class return draws. */
     record TracksAllocation() implements SleeveYieldPolicy {}
