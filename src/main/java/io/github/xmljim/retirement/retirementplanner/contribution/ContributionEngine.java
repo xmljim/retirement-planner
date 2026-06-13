@@ -11,7 +11,6 @@ import java.util.List;
 import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
 import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
 import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfile;
-import io.github.xmljim.retirement.retirementplanner.shared.CashFlow;
 
 /**
  * Computes the per-month employee + employer contributions for one
@@ -29,9 +28,8 @@ import io.github.xmljim.retirement.retirementplanner.shared.CashFlow;
  * start&rdquo; is satisfied implicitly because {@code forYear(year)}
  * returns nothing on the first call of a fresh year.
  *
- * <p>Out of scope for S-2.4 (deferred to later stories):
+ * <p>Out of scope (deferred to later stories):
  * <ul>
- *   <li>SECURE 2.0 §603 high-earner Roth catch-up routing — S-2.5</li>
  *   <li>SECURE 2.0 §604 employer-match Roth election — S-2.6</li>
  *   <li>HSA family-pool spousal sharing — tech-debt</li>
  *   <li>Per-employer §415(c) grouping (currently grouped per
@@ -45,7 +43,9 @@ public interface ContributionEngine {
 
     /**
      * Computes the cash flows for one {@link Person} in one calendar
-     * month across the supplied {@code accounts}.
+     * month across the supplied {@code accounts}, plus any
+     * {@link EngineWarning}s raised while applying §603 / §604 routing
+     * rules.
      *
      * @param person          whose accounts are being contributed to
      * @param accounts        the person's accounts (filter to those the
@@ -56,10 +56,10 @@ public interface ContributionEngine {
      *                        year-to-date cap enforcement
      * @param year            the calendar year
      * @param month           the calendar month
-     * @return new flows for this month only (callers append to the
-     *         ledger themselves)
+     * @return result containing this month's flows (callers append to
+     *         the ledger themselves) and any warnings to surface
      */
-    List<CashFlow> contributeForMonth(
+    MonthlyContributionResult contributeForMonth(
             Person person,
             List<Account> accounts,
             SalaryProfile salaryProfile,

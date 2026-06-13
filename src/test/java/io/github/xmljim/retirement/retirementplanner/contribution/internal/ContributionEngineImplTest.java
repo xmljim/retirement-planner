@@ -20,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.github.xmljim.retirement.retirementplanner.contribution.CashFlowLedger;
+import io.github.xmljim.retirement.retirementplanner.contribution.MonthlyContributionResult;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
 import io.github.xmljim.retirement.retirementplanner.plan.account.AccountId;
@@ -82,12 +83,13 @@ class ContributionEngineImplTest {
         Account account = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(SIX_PCT, simpleMatch()));
         Person person = person(40);
 
-        List<CashFlow> flows = engine.contributeForMonth(
+        MonthlyContributionResult result = engine.contributeForMonth(
                 person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY);
 
-        assertThat(flows).hasSize(2);
-        assertThat(flowAmount(flows, CashFlowKind.EMPLOYEE_PRETAX)).isEqualTo(monthly(MID_SALARY, "0.06"));
-        assertThat(flowAmount(flows, CashFlowKind.EMPLOYER_MATCH)).isEqualTo(monthly(MID_SALARY, "0.04"));
+        assertThat(result.flows()).hasSize(2);
+        assertThat(result.warnings()).isEmpty();
+        assertThat(flowAmount(result.flows(), CashFlowKind.EMPLOYEE_PRETAX)).isEqualTo(monthly(MID_SALARY, "0.06"));
+        assertThat(flowAmount(result.flows(), CashFlowKind.EMPLOYER_MATCH)).isEqualTo(monthly(MID_SALARY, "0.04"));
     }
 
     @Test
@@ -177,9 +179,11 @@ class ContributionEngineImplTest {
         Person person = person(40);
 
         List<CashFlow> jan = engine.contributeForMonth(
-                person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY);
+                        person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY)
+                .flows();
         List<CashFlow> mar = engine.contributeForMonth(
-                person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.MARCH);
+                        person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.MARCH)
+                .flows();
 
         Money janEmployee = flowAmount(jan, CashFlowKind.EMPLOYEE_PRETAX);
         Money marEmployee = flowAmount(mar, CashFlowKind.EMPLOYEE_PRETAX);
@@ -200,8 +204,9 @@ class ContributionEngineImplTest {
                         .total())
                 .isEqualTo(Money.usd(SECTION_402G_LIMIT));
 
-        List<CashFlow> jan2027 =
-                engine.contributeForMonth(person, List.of(account), salary, ledger, YEAR_2027, Month.JANUARY);
+        List<CashFlow> jan2027 = engine.contributeForMonth(
+                        person, List.of(account), salary, ledger, YEAR_2027, Month.JANUARY)
+                .flows();
         assertThat(flowAmount(jan2027, CashFlowKind.EMPLOYEE_PRETAX)).isEqualTo(monthly(HIGH_SALARY, "0.10"));
     }
 
@@ -257,7 +262,8 @@ class ContributionEngineImplTest {
         Person person = person(40);
 
         List<CashFlow> flows = engine.contributeForMonth(
-                person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY);
+                        person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY)
+                .flows();
         assertThat(flowAmount(flows, CashFlowKind.EMPLOYEE_AFTER_TAX)).isEqualTo(monthly(MID_SALARY, "0.06"));
     }
 
@@ -284,7 +290,8 @@ class ContributionEngineImplTest {
         Person person = person(40);
 
         List<CashFlow> flows = engine.contributeForMonth(
-                person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY);
+                        person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY)
+                .flows();
         assertThat(flowAmount(flows, CashFlowKind.EMPLOYEE_TRADITIONAL_IRA)).isEqualTo(Money.usd("500"));
     }
 
@@ -303,7 +310,8 @@ class ContributionEngineImplTest {
         Person person = person(40);
 
         List<CashFlow> flows = engine.contributeForMonth(
-                person, List.of(persisted), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY);
+                        person, List.of(persisted), salary, CashFlowLedger.empty(), YEAR_2026, Month.JANUARY)
+                .flows();
         assertThat(flows).isEmpty();
     }
 
@@ -321,7 +329,8 @@ class ContributionEngineImplTest {
         Person person = person(40);
 
         List<CashFlow> flows = engine.contributeForMonth(
-                person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JUNE);
+                        person, List.of(account), salary, CashFlowLedger.empty(), YEAR_2026, Month.JUNE)
+                .flows();
         assertThat(flows).isEmpty();
     }
 
@@ -335,7 +344,8 @@ class ContributionEngineImplTest {
                 .reduce(
                         CashFlowLedger.empty(),
                         (ledger, m) -> ledger.appendAll(
-                                engine.contributeForMonth(person, accounts, salary, ledger, year, Month.of(m))),
+                                engine.contributeForMonth(person, accounts, salary, ledger, year, Month.of(m))
+                                        .flows()),
                         (a, b) -> a);
     }
 
@@ -347,10 +357,15 @@ class ContributionEngineImplTest {
     }
 
     private static SalaryProfile salary(int annual, int growthBps) {
-        return SalaryProfile.of(
+        return new SalaryProfile(
+                Optional.empty(),
                 Money.usd(Integer.toString(annual)),
                 BASE_DATE,
-                BigDecimal.valueOf(growthBps).movePointLeft(4));
+                BigDecimal.valueOf(growthBps).movePointLeft(4),
+                Month.JANUARY,
+                List.of(),
+                Optional.empty(),
+                Optional.of(Money.ZERO_USD));
     }
 
     private static SalaryProfile salaryWithBonus(int annual, String bonusAmount, Month payoutMonth) {
@@ -361,7 +376,8 @@ class ContributionEngineImplTest {
                 BigDecimal.ZERO,
                 Month.JANUARY,
                 List.of(),
-                Optional.of(new FixedBonus(Money.usd(bonusAmount), payoutMonth)));
+                Optional.of(new FixedBonus(Money.usd(bonusAmount), payoutMonth)),
+                Optional.of(Money.ZERO_USD));
     }
 
     private static Account account(long id, AccountType type, ContributionPolicy policy) {

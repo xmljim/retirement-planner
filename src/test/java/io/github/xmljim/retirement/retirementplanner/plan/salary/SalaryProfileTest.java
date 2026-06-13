@@ -63,6 +63,7 @@ class SalaryProfileTest {
                 FOUR_PCT,
                 Month.JANUARY,
                 List.of(promotion),
+                Optional.empty(),
                 Optional.empty());
         assertThat(profile.salaryAt(LocalDate.of(2027, 5, 31))).isEqualTo(Money.usd("104000"));
         assertThat(profile.salaryAt(LocalDate.of(2027, 6, 1))).isEqualTo(Money.usd(PROMOTION));
@@ -82,6 +83,7 @@ class SalaryProfileTest {
                 FOUR_PCT,
                 Month.JANUARY,
                 List.of(first, second),
+                Optional.empty(),
                 Optional.empty());
         assertThat(profile.salaryAt(LocalDate.of(2030, 1, 1))).isEqualTo(Money.usd("146232.32"));
         assertThat(profile.salaryAt(LocalDate.of(2030, 3, 15))).isEqualTo(Money.usd("180000"));
@@ -93,7 +95,14 @@ class SalaryProfileTest {
     @DisplayName("salaryAt honors a non-January raise month")
     void salaryAtCustomRaiseMonth() {
         SalaryProfile profile = new SalaryProfile(
-                Optional.empty(), Money.usd(BASE), JAN_1_2026, FOUR_PCT, Month.JULY, List.of(), Optional.empty());
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                FOUR_PCT,
+                Month.JULY,
+                List.of(),
+                Optional.empty(),
+                Optional.empty());
         assertThat(profile.salaryAt(LocalDate.of(2026, 6, 30))).isEqualTo(Money.usd(BASE));
         assertThat(profile.salaryAt(LocalDate.of(2026, 7, 1))).isEqualTo(Money.usd("104000"));
         assertThat(profile.salaryAt(LocalDate.of(2027, 7, 1))).isEqualTo(Money.usd("108160"));
@@ -112,7 +121,14 @@ class SalaryProfileTest {
     void fixedBonusPayoutMonth() {
         BonusPolicy bonus = new FixedBonus(Money.usd(FIXED_BONUS), Month.MARCH);
         SalaryProfile profile = new SalaryProfile(
-                Optional.empty(), Money.usd(BASE), JAN_1_2026, FOUR_PCT, Month.JANUARY, List.of(), Optional.of(bonus));
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                FOUR_PCT,
+                Month.JANUARY,
+                List.of(),
+                Optional.of(bonus),
+                Optional.empty());
         assertThat(profile.bonusFor(YearMonth.of(2026, 3))).contains(Money.usd(FIXED_BONUS));
         assertThat(profile.bonusFor(YearMonth.of(2027, 3))).contains(Money.usd(FIXED_BONUS));
         assertThat(profile.bonusFor(YearMonth.of(2026, 4))).isEmpty();
@@ -123,7 +139,14 @@ class SalaryProfileTest {
     void percentBonusUsesCurrentSalary() {
         BonusPolicy bonus = new PercentOfSalaryBonus(new BigDecimal("0.10"), Month.MARCH);
         SalaryProfile profile = new SalaryProfile(
-                Optional.empty(), Money.usd(BASE), JAN_1_2026, FOUR_PCT, Month.JANUARY, List.of(), Optional.of(bonus));
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                FOUR_PCT,
+                Month.JANUARY,
+                List.of(),
+                Optional.of(bonus),
+                Optional.empty());
         assertThat(profile.bonusFor(YearMonth.of(2026, 3))).contains(Money.usd(FIXED_BONUS));
         assertThat(profile.bonusFor(YearMonth.of(2027, 3))).contains(Money.usd("10400"));
     }
@@ -140,7 +163,14 @@ class SalaryProfileTest {
     void bonusForPreBaseDate() {
         BonusPolicy bonus = new FixedBonus(Money.usd(FIXED_BONUS), Month.MARCH);
         SalaryProfile profile = new SalaryProfile(
-                Optional.empty(), Money.usd(BASE), JAN_1_2026, FOUR_PCT, Month.JANUARY, List.of(), Optional.of(bonus));
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                FOUR_PCT,
+                Month.JANUARY,
+                List.of(),
+                Optional.of(bonus),
+                Optional.empty());
         assertThat(profile.bonusFor(YearMonth.of(2025, 3))).isEmpty();
     }
 
@@ -162,6 +192,7 @@ class SalaryProfileTest {
                         FOUR_PCT,
                         Month.JANUARY,
                         List.of(bad),
+                        Optional.empty(),
                         Optional.empty()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -173,5 +204,72 @@ class SalaryProfileTest {
         assertThatThrownBy(() ->
                         profile.overrides().add(new SalaryOverride(LocalDate.of(2027, 1, 1), Money.usd("110000"))))
                 .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    @DisplayName("priorYearWagesFor returns the explicit baseline when prior year is before baseDate")
+    void priorYearWagesForUsesExplicitBaseline() {
+        SalaryProfile profile = new SalaryProfile(
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                FOUR_PCT,
+                Month.JANUARY,
+                List.of(),
+                Optional.empty(),
+                Optional.of(Money.usd("96000")));
+        assertThat(profile.priorYearWagesFor(2026)).isEqualTo(Money.usd("96000"));
+    }
+
+    @Test
+    @DisplayName("priorYearWagesFor back-derives from currentSalary / (1 + growth) when no baseline supplied")
+    void priorYearWagesForBackDerives() {
+        SalaryProfile profile = SalaryProfile.of(Money.usd(BASE), JAN_1_2026, FOUR_PCT);
+        assertThat(profile.priorYearWagesFor(2026)).isEqualTo(Money.usd("96153.846154"));
+    }
+
+    @Test
+    @DisplayName("priorYearWagesFor falls through to currentSalary when growth is zero")
+    void priorYearWagesForZeroGrowth() {
+        SalaryProfile profile = SalaryProfile.of(Money.usd(BASE), JAN_1_2026, BigDecimal.ZERO);
+        assertThat(profile.priorYearWagesFor(2026)).isEqualTo(Money.usd(BASE));
+    }
+
+    @Test
+    @DisplayName("priorYearWagesFor integrates monthly salary across the prior simulated year")
+    void priorYearWagesForIntegratesPriorYear() {
+        SalaryProfile profile = SalaryProfile.of(Money.usd(BASE), JAN_1_2026, BigDecimal.ZERO);
+        assertThat(profile.priorYearWagesFor(2027)).isEqualTo(Money.usd(BASE));
+    }
+
+    @Test
+    @DisplayName("priorYearWagesFor adds bonuses paid in the prior simulated year")
+    void priorYearWagesForIncludesPriorYearBonus() {
+        BonusPolicy bonus = new FixedBonus(Money.usd(FIXED_BONUS), Month.MARCH);
+        SalaryProfile profile = new SalaryProfile(
+                Optional.empty(),
+                Money.usd(BASE),
+                JAN_1_2026,
+                BigDecimal.ZERO,
+                Month.JANUARY,
+                List.of(),
+                Optional.of(bonus),
+                Optional.empty());
+        assertThat(profile.priorYearWagesFor(2027)).isEqualTo(Money.usd("110000"));
+    }
+
+    @Test
+    @DisplayName("SalaryProfile rejects negative priorYearFicaWages")
+    void rejectsNegativePriorYearFicaWages() {
+        assertThatThrownBy(() -> new SalaryProfile(
+                        Optional.empty(),
+                        Money.usd(BASE),
+                        JAN_1_2026,
+                        FOUR_PCT,
+                        Month.JANUARY,
+                        List.of(),
+                        Optional.empty(),
+                        Optional.of(Money.usd("-1"))))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

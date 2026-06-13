@@ -35,6 +35,15 @@ import io.github.xmljim.retirement.retirementplanner.shared.Money;
  * <p>Optional {@link BonusPolicy} pays once per year in its configured
  * month, on top of regular salary.
  *
+ * <p>{@link #priorYearFicaWages()} is the user-supplied baseline for
+ * the simulation's first contribution year — typically a copy of the
+ * most recent W-2 Box 3. It exists for {@link #priorYearWagesFor(int)}
+ * to answer the SECURE 2.0 §603 high-earner test in year 0, where no
+ * prior simulated year exists. When absent, the engine back-derives
+ * an approximation from {@link #currentSalary()} and
+ * {@link #annualGrowthRate()}; users straddling the §603 threshold
+ * should supply the explicit baseline.
+ *
  * <p>{@code id} is absent on a freshly constructed profile that has
  * not yet been persisted; the repository populates it on save.
  */
@@ -45,7 +54,10 @@ public record SalaryProfile(
         BigDecimal annualGrowthRate,
         Month raiseMonth,
         List<SalaryOverride> overrides,
-        Optional<BonusPolicy> bonus) {
+        Optional<BonusPolicy> bonus,
+        Optional<Money> priorYearFicaWages) {
+
+    private static final BigDecimal MONTHS_PER_YEAR = new BigDecimal("12");
 
     public SalaryProfile {
         Objects.requireNonNull(id, "id");
@@ -55,9 +67,13 @@ public record SalaryProfile(
         Objects.requireNonNull(raiseMonth, "raiseMonth");
         Objects.requireNonNull(overrides, "overrides");
         Objects.requireNonNull(bonus, "bonus");
+        Objects.requireNonNull(priorYearFicaWages, "priorYearFicaWages");
         if (annualGrowthRate.signum() < 0) {
             throw new IllegalArgumentException("annualGrowthRate must be non-negative: " + annualGrowthRate);
         }
+        priorYearFicaWages.filter(w -> w.amount().signum() < 0).ifPresent(w -> {
+            throw new IllegalArgumentException("priorYearFicaWages must be non-negative: " + w);
+        });
         overrides.stream()
                 .filter(o -> o.effectiveDate().isBefore(baseDate))
                 .findAny()
@@ -68,7 +84,7 @@ public record SalaryProfile(
         overrides = List.copyOf(overrides);
     }
 
-    /** Convenience constructor: January raise month, no bonus, no overrides. */
+    /** Convenience constructor: January raise month, no bonus, no overrides, no priorYearFicaWages. */
     public static SalaryProfile of(Money currentSalary, LocalDate baseDate, BigDecimal annualGrowthRate) {
         return new SalaryProfile(
                 Optional.empty(),
@@ -77,6 +93,7 @@ public record SalaryProfile(
                 annualGrowthRate,
                 Month.JANUARY,
                 List.of(),
+                Optional.empty(),
                 Optional.empty());
     }
 
@@ -108,6 +125,55 @@ public record SalaryProfile(
         }
         BigDecimal multiplier = BigDecimal.ONE.add(annualGrowthRate).pow(raiseCount);
         return anchorSalary.times(multiplier);
+    }
+
+    /**
+     * Returns the wages used to test SECURE 2.0 §603 eligibility for
+     * contribution year {@code contributionYear} — i.e. the wages
+     * earned in {@code contributionYear - 1}.
+     *
+     * <p>Sourcing rules (per ADR-003):
+     * <ul>
+     *   <li>If {@code contributionYear - 1} is at or after the year of
+     *       {@link #baseDate()}, integrates from the salary stream:
+     *       12 × monthly salary at end of the prior year, plus any
+     *       bonus paid in the prior year. This is exact for years the
+     *       simulation has projected.</li>
+     *   <li>Otherwise (the simulation's first year, where no prior
+     *       year is in scope), returns {@link #priorYearFicaWages()}
+     *       when present (user-supplied baseline — typically the most
+     *       recent W-2 Box 3). When absent, back-derives an
+     *       approximation as {@code currentSalary / (1 + annualGrowthRate)}.
+     *       The approximation assumes a single annual raise at the
+     *       configured rate and ignores bonuses; users straddling the
+     *       §603 threshold should supply
+     *       {@link #priorYearFicaWages()} explicitly.</li>
+     * </ul>
+     */
+    public Money priorYearWagesFor(int contributionYear) {
+        int priorYear = contributionYear - 1;
+        if (priorYear < baseDate.getYear()) {
+            return priorYearFicaWages.orElseGet(this::backDerivedPriorYearWages);
+        }
+        Money annualizedSum = IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> YearMonth.of(priorYear, m))
+                .filter(ym -> !ym.atEndOfMonth().isBefore(baseDate))
+                .map(ym -> salaryAt(ym.atEndOfMonth()))
+                .reduce(Money.ZERO_USD, Money::plus);
+        Money monthlySum = annualizedSum.dividedBy(MONTHS_PER_YEAR);
+        Money bonusPaid = IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> bonusFor(YearMonth.of(priorYear, m)))
+                .flatMap(Optional::stream)
+                .reduce(Money.ZERO_USD, Money::plus);
+        return monthlySum.plus(bonusPaid);
+    }
+
+    private Money backDerivedPriorYearWages() {
+        BigDecimal divisor = BigDecimal.ONE.add(annualGrowthRate);
+        if (divisor.signum() <= 0) {
+            return currentSalary;
+        }
+        return currentSalary.dividedBy(divisor);
     }
 
     /**
