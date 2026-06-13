@@ -200,7 +200,8 @@ class Section603EngineTest {
                 Optional.of(WAGES_ABOVE_THRESHOLD));
         Account trad = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(TEN_PCT, null));
         Account roth = account(2L, AccountType.ROTH_401K, percentPolicy(BigDecimal.ZERO, null));
-        Person person = new Person(Optional.of(PERSON_ID), Optional.empty(), BASE_DATE_2025.minusYears(55));
+        LocalDate dob = BASE_DATE_2025.minusYears(55);
+        Person person = new Person(Optional.of(PERSON_ID), Optional.empty(), dob, dob.plusYears(100));
 
         CashFlowLedger ledger = runYear(person, List.of(trad, roth), salary, YEAR_2025);
 
@@ -443,7 +444,8 @@ class Section603EngineTest {
     }
 
     private static Person person(int age) {
-        return new Person(Optional.of(PERSON_ID), Optional.empty(), BASE_DATE.minusYears(age));
+        LocalDate dob = BASE_DATE.minusYears(age);
+        return new Person(Optional.of(PERSON_ID), Optional.empty(), dob, dob.plusYears(100));
     }
 
     /** Accumulator for runYearCollecting that threads ledger and warnings together. */

@@ -19,6 +19,7 @@ public final class PersonMappers {
         return new Person(
                 Optional.of(new PersonId(entity.getId())),
                 Optional.of(new SalaryProfileId(entity.getSalaryProfile().getId())),
-                entity.getDob());
+                entity.getDob(),
+                entity.getRetirementDate());
     }
 }

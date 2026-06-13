@@ -24,18 +24,25 @@ import io.github.xmljim.retirement.retirementplanner.plan.salary.SalaryProfileId
 
 class PlanRecordsTest {
 
+    private static final LocalDate RETIREMENT_2040 = LocalDate.of(2040, 1, 1);
+    private static final BigDecimal RETURN_RATE = new BigDecimal("0.07");
+    private static final BigDecimal CASH_RATE = new BigDecimal("0.04");
+    private static final Assumptions DEFAULT_ASSUMPTIONS = new Assumptions(RETURN_RATE, CASH_RATE);
+
     @Test
     @DisplayName("Plan rejects null household")
     void planRejectsNullHousehold() {
-        List<Person> persons = List.of(Person.of(LocalDate.of(1975, 6, 15)));
-        assertThatThrownBy(() -> Plan.of(1L, null, persons)).isInstanceOf(IllegalArgumentException.class);
+        List<Person> persons = List.of(Person.of(LocalDate.of(1975, 6, 15), RETIREMENT_2040));
+        assertThatThrownBy(() -> Plan.of(1L, null, persons, DEFAULT_ASSUMPTIONS))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("Plan rejects null person list")
     void planRejectsNullPersons() {
         Household household = Household.of(FilingStatus.SINGLE, "VA");
-        assertThatThrownBy(() -> Plan.of(1L, household, null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Plan.of(1L, household, null, DEFAULT_ASSUMPTIONS))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -43,7 +50,8 @@ class PlanRecordsTest {
     void planRejectsEmptyPersons() {
         Household household = Household.of(FilingStatus.SINGLE, "VA");
         List<Person> persons = List.of();
-        assertThatThrownBy(() -> Plan.of(1L, household, persons)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Plan.of(1L, household, persons, DEFAULT_ASSUMPTIONS))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -51,19 +59,29 @@ class PlanRecordsTest {
     void planRejectsThreePersons() {
         Household household = Household.of(FilingStatus.SINGLE, "VA");
         List<Person> persons = List.of(
-                Person.of(LocalDate.of(1970, 1, 1)),
-                Person.of(LocalDate.of(1972, 1, 1)),
-                Person.of(LocalDate.of(1974, 1, 1)));
-        assertThatThrownBy(() -> Plan.of(1L, household, persons)).isInstanceOf(IllegalArgumentException.class);
+                Person.of(LocalDate.of(1970, 1, 1), RETIREMENT_2040),
+                Person.of(LocalDate.of(1972, 1, 1), RETIREMENT_2040),
+                Person.of(LocalDate.of(1974, 1, 1), RETIREMENT_2040));
+        assertThatThrownBy(() -> Plan.of(1L, household, persons, DEFAULT_ASSUMPTIONS))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("Plan defensively copies the persons list")
     void planCopiesPersons() {
         Household household = Household.of(FilingStatus.SINGLE, "VA");
-        Plan plan = Plan.of(1L, household, List.of(Person.of(LocalDate.of(1975, 1, 1))));
-        assertThatThrownBy(() -> plan.persons().add(Person.of(LocalDate.of(2000, 1, 1))))
+        Plan plan = Plan.of(
+                1L, household, List.of(Person.of(LocalDate.of(1975, 1, 1), RETIREMENT_2040)), DEFAULT_ASSUMPTIONS);
+        assertThatThrownBy(() -> plan.persons().add(Person.of(LocalDate.of(2000, 1, 1), RETIREMENT_2040)))
                 .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    @DisplayName("Plan rejects null assumptions")
+    void planRejectsNullAssumptions() {
+        Household household = Household.of(FilingStatus.SINGLE, "VA");
+        List<Person> persons = List.of(Person.of(LocalDate.of(1975, 6, 15), RETIREMENT_2040));
+        assertThatThrownBy(() -> Plan.of(1L, household, persons, null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -87,7 +105,22 @@ class PlanRecordsTest {
     @Test
     @DisplayName("Person rejects null DOB")
     void personRejectsNullDob() {
-        assertThatThrownBy(() -> Person.of(null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Person.of(null, RETIREMENT_2040)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Person rejects null retirement date")
+    void personRejectsNullRetirementDate() {
+        assertThatThrownBy(() -> Person.of(LocalDate.of(1975, 6, 15), null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Person rejects retirement date not after dob")
+    void personRejectsRetirementBeforeDob() {
+        LocalDate dob = LocalDate.of(1975, 6, 15);
+        assertThatThrownBy(() -> Person.of(dob, dob)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Person.of(dob, dob.minusDays(1))).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -102,22 +135,21 @@ class PlanRecordsTest {
     @Test
     @DisplayName("Assumptions carries the supplied rates")
     void assumptionsCarriesRates() {
-        Assumptions a = new Assumptions(new BigDecimal("0.07"), new BigDecimal("0.045"));
-        assertThat(a.preRetirementReturnRate()).isEqualByComparingTo("0.07");
-        assertThat(a.cashInterestRate()).isEqualByComparingTo("0.045");
+        BigDecimal alternateCashRate = new BigDecimal("0.045");
+        Assumptions a = new Assumptions(RETURN_RATE, alternateCashRate);
+        assertThat(a.preRetirementReturnRate()).isEqualByComparingTo(RETURN_RATE);
+        assertThat(a.cashInterestRate()).isEqualByComparingTo(alternateCashRate);
     }
 
     @Test
     @DisplayName("Assumptions rejects null preRetirementReturnRate")
     void assumptionsRejectsNullReturnRate() {
-        assertThatThrownBy(() -> new Assumptions(null, new BigDecimal("0.045")))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new Assumptions(null, CASH_RATE)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
     @DisplayName("Assumptions rejects null cashInterestRate")
     void assumptionsRejectsNullCashInterestRate() {
-        assertThatThrownBy(() -> new Assumptions(new BigDecimal("0.07"), null))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> new Assumptions(RETURN_RATE, null)).isInstanceOf(NullPointerException.class);
     }
 }

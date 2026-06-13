@@ -16,15 +16,20 @@ import jakarta.validation.constraints.Past;
 
 /**
  * Person DTO. {@code id} and {@code salaryProfileId} are null on POST
- * and populated on read.
+ * and populated on read. {@code retirementDate} is required and must
+ * be after {@code dob}.
  */
 public record PersonDto(
-        Long id, Long salaryProfileId, @NotNull @Past LocalDate dob) {
+        Long id,
+        Long salaryProfileId,
+        @NotNull @Past LocalDate dob,
+        @NotNull LocalDate retirementDate) {
 
     public static PersonDto from(Person person) {
         return new PersonDto(
                 person.id().map(PersonId::value).orElse(null),
                 person.salaryProfileId().map(SalaryProfileId::value).orElse(null),
-                person.dob());
+                person.dob(),
+                person.retirementDate());
     }
 }

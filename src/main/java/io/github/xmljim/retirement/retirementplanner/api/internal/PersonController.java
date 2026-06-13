@@ -36,7 +36,7 @@ class PersonController implements PersonOperations {
 
     @Override
     public ResponseEntity<PersonDto> add(long planId, PersonDto person) {
-        Person created = service.add(new PlanId(planId), Person.of(person.dob()));
+        Person created = service.add(new PlanId(planId), Person.of(person.dob(), person.retirementDate()));
         long newId = created.id().orElseThrow().value();
         return ResponseEntity.created(PersonOperations.locationOf(newId)).body(PersonDto.from(created));
     }
@@ -48,7 +48,7 @@ class PersonController implements PersonOperations {
 
     @Override
     public PersonDto replace(long id, PersonDto person) {
-        Person replacement = new Person(Optional.empty(), Optional.empty(), person.dob());
+        Person replacement = new Person(Optional.empty(), Optional.empty(), person.dob(), person.retirementDate());
         return PersonDto.from(service.replace(new PersonId(id), replacement));
     }
 

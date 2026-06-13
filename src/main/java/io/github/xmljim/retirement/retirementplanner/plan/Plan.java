@@ -6,6 +6,7 @@
 package io.github.xmljim.retirement.retirementplanner.plan;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
@@ -16,28 +17,34 @@ import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
  *
  * <p>Owns one {@link Household} and one or two {@link Person}s. Future
  * fields (Accounts, Buckets, AssetAllocationPolicy) land in subsequent
- * stories. {@link Assumptions} is defined in this package but not yet
- * threaded onto {@code Plan} — engine callers pass it explicitly until
- * S-2.8 wires it into the projection request.
+ * stories.
+ *
+ * <p>{@link Assumptions} is required from S-2.8 onward — the
+ * deterministic accumulation projector reads pre-retirement return
+ * rate and cash interest rate from here. Scenario-level overrides
+ * (EPIC-6) layer on top without re-typing per request.
  *
  * <p>{@code tenantId} carries multi-tenancy from day one — solo mode
  * uses the {@code "solo"} tenant seeded in {@code V1__init.sql}.
  * {@code id} is absent before persistence; the repository populates it
  * on save.
  */
-public record Plan(Optional<PlanId> id, long tenantId, Household household, List<Person> persons) {
+public record Plan(
+        Optional<PlanId> id, long tenantId, Household household, List<Person> persons, Assumptions assumptions) {
 
     public Plan {
+        Objects.requireNonNull(id, "id");
         if (household == null) {
             throw new IllegalArgumentException("household is required");
         }
         if (persons == null || persons.isEmpty() || persons.size() > 2) {
             throw new IllegalArgumentException("persons must contain 1 or 2 entries");
         }
+        Objects.requireNonNull(assumptions, "assumptions");
         persons = List.copyOf(persons);
     }
 
-    public static Plan of(long tenantId, Household household, List<Person> persons) {
-        return new Plan(Optional.empty(), tenantId, household, persons);
+    public static Plan of(long tenantId, Household household, List<Person> persons, Assumptions assumptions) {
+        return new Plan(Optional.empty(), tenantId, household, persons, assumptions);
     }
 }

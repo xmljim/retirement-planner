@@ -43,7 +43,8 @@ class PersonServiceImpl implements PersonService {
     @Override
     public Person replace(PersonId id, Person replacement) {
         Person existing = repository.findById(id).orElseThrow(() -> notFound(id));
-        Person merged = new Person(existing.id(), existing.salaryProfileId(), replacement.dob());
+        Person merged =
+                new Person(existing.id(), existing.salaryProfileId(), replacement.dob(), replacement.retirementDate());
         return repository.update(merged);
     }
 

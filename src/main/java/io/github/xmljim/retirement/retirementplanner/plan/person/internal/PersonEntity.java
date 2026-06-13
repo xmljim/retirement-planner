@@ -43,6 +43,9 @@ public class PersonEntity {
     @Column(nullable = false)
     private LocalDate dob;
 
+    @Column(name = "retirement_date", nullable = false)
+    private LocalDate retirementDate;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -75,6 +78,14 @@ public class PersonEntity {
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
+    }
+
+    public LocalDate getRetirementDate() {
+        return retirementDate;
+    }
+
+    public void setRetirementDate(LocalDate retirementDate) {
+        this.retirementDate = retirementDate;
     }
 
     @PrePersist

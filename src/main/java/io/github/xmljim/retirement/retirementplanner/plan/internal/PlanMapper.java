@@ -8,6 +8,7 @@ package io.github.xmljim.retirement.retirementplanner.plan.internal;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.xmljim.retirement.retirementplanner.plan.Assumptions;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 import io.github.xmljim.retirement.retirementplanner.plan.household.Household;
@@ -32,14 +33,18 @@ public final class PlanMapper {
                 .map(p -> new Person(
                         Optional.of(new PersonId(p.getId())),
                         Optional.of(new SalaryProfileId(p.getSalaryProfile().getId())),
-                        p.getDob()))
+                        p.getDob(),
+                        p.getRetirementDate()))
                 .toList();
-        return new Plan(Optional.of(new PlanId(entity.getId())), entity.getTenantId(), household, persons);
+        Assumptions assumptions = new Assumptions(entity.getPreRetirementReturnRate(), entity.getCashInterestRate());
+        return new Plan(Optional.of(new PlanId(entity.getId())), entity.getTenantId(), household, persons, assumptions);
     }
 
     static PlanEntity toEntity(Plan plan) {
         PlanEntity entity = new PlanEntity();
         entity.setTenantId(plan.tenantId());
+        entity.setPreRetirementReturnRate(plan.assumptions().preRetirementReturnRate());
+        entity.setCashInterestRate(plan.assumptions().cashInterestRate());
 
         HouseholdEntity household = new HouseholdEntity();
         household.setFilingStatus(plan.household().filingStatus());
@@ -49,6 +54,7 @@ public final class PlanMapper {
         plan.persons().forEach(person -> {
             PersonEntity pe = new PersonEntity();
             pe.setDob(person.dob());
+            pe.setRetirementDate(person.retirementDate());
             pe.setSalaryProfile(new SalaryProfileEntity());
             entity.addPerson(pe);
         });

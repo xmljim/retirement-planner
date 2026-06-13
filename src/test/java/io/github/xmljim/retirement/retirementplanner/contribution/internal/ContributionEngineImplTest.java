@@ -409,7 +409,8 @@ class ContributionEngineImplTest {
     }
 
     private static Person person(int age) {
-        return new Person(Optional.of(PERSON_ID), Optional.empty(), BASE_DATE.minusYears(age));
+        LocalDate dob = BASE_DATE.minusYears(age);
+        return new Person(Optional.of(PERSON_ID), Optional.empty(), dob, dob.plusYears(100));
     }
 
     private static LocalDate startedYear(int year) {

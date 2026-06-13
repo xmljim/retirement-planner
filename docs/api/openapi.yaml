@@ -387,6 +387,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/plans/{id}/projection:
+    get:
+      tags:
+      - Plans
+      summary: Month-by-month deterministic accumulation projection from today to
+        retirement
+      operationId: projection
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+          default: deterministic
+      responses:
+        "200":
+          description: Monthly projection (possibly empty if already past horizon)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonthlyProjectionDto"
+        "404":
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /api/v1/accounts/{id}/sleeves:
     get:
       tags:
@@ -417,6 +452,16 @@ paths:
                 $ref: "#/components/schemas/ProblemDetail"
 components:
   schemas:
+    AssumptionsDto:
+      type: object
+      properties:
+        preRetirementReturnRate:
+          type: number
+        cashInterestRate:
+          type: number
+      required:
+      - cashInterestRate
+      - preRetirementReturnRate
     HouseholdDto:
       type: object
       properties:
@@ -449,8 +494,12 @@ components:
         dob:
           type: string
           format: date
+        retirementDate:
+          type: string
+          format: date
       required:
       - dob
+      - retirementDate
     PlanDto:
       type: object
       properties:
@@ -468,7 +517,10 @@ components:
             $ref: "#/components/schemas/PersonDto"
           maxItems: 2
           minItems: 0
+        assumptions:
+          $ref: "#/components/schemas/AssumptionsDto"
       required:
+      - assumptions
       - household
       - persons
     ProblemDetail:
@@ -721,3 +773,51 @@ components:
     TracksAllocation:
       allOf:
       - $ref: "#/components/schemas/SleeveYieldPolicyDto"
+    AccountBalanceDto:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        endingBalance:
+          $ref: "#/components/schemas/MoneyDto"
+    CashFlowDto:
+      type: object
+      properties:
+        period:
+          type: string
+        accountId:
+          type: integer
+          format: int64
+        kind:
+          type: string
+          enum:
+          - EMPLOYEE_PRETAX
+          - EMPLOYEE_ROTH
+          - EMPLOYEE_TRADITIONAL_IRA
+          - EMPLOYEE_HSA
+          - EMPLOYEE_AFTER_TAX
+          - EMPLOYER_MATCH
+          - EMPLOYEE_ROTH_CATCHUP
+          - EMPLOYER_MATCH_ROTH
+        amount:
+          $ref: "#/components/schemas/MoneyDto"
+    MonthlyProjectionDto:
+      type: object
+      properties:
+        period:
+          type: string
+        phase:
+          type: string
+          enum:
+          - ACCUMULATION
+          - BRIDGE
+          - DRAWDOWN
+        accountBalances:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountBalanceDto"
+        cashFlows:
+          type: array
+          items:
+            $ref: "#/components/schemas/CashFlowDto"

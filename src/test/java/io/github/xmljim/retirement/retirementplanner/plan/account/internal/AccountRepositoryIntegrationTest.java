@@ -27,6 +27,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import io.github.xmljim.retirement.retirementplanner.plan.Assumptions;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 import io.github.xmljim.retirement.retirementplanner.plan.account.Account;
@@ -422,8 +423,11 @@ class AccountRepositoryIntegrationTest {
     }
 
     private Plan newPlan(long tenantId, FilingStatus filing, String state) {
-        return planRepository.save(
-                Plan.of(tenantId, Household.of(filing, state), List.of(Person.of(LocalDate.of(1975, 6, 15)))));
+        return planRepository.save(Plan.of(
+                tenantId,
+                Household.of(filing, state),
+                List.of(Person.of(LocalDate.of(1975, 6, 15), LocalDate.of(2040, 1, 1))),
+                new Assumptions(new BigDecimal("0.07"), new BigDecimal("0.04"))));
     }
 
     private void whenTenantIs(long tenantId) {

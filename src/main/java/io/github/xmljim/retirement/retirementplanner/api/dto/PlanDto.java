@@ -26,14 +26,16 @@ public record PlanDto(
         Long id,
         Long tenantId,
         @NotNull @Valid HouseholdDto household,
-        @NotNull @NotEmpty @Size(max = 2) @Valid List<PersonDto> persons) {
+        @NotNull @NotEmpty @Size(max = 2) @Valid List<PersonDto> persons,
+        @NotNull @Valid AssumptionsDto assumptions) {
 
     public static PlanDto from(Plan plan) {
         return new PlanDto(
                 plan.id().map(PlanId::value).orElse(null),
                 plan.tenantId(),
                 HouseholdDto.from(plan.household()),
-                plan.persons().stream().map(PersonDto::from).toList());
+                plan.persons().stream().map(PersonDto::from).toList(),
+                AssumptionsDto.from(plan.assumptions()));
     }
 
     /**
@@ -43,8 +45,9 @@ public record PlanDto(
      */
     public Plan toNewPlan(long activeTenant) {
         Household domainHousehold = Household.of(household.filingStatus(), household.state());
-        List<Person> domainPersons =
-                persons.stream().map(p -> Person.of(p.dob())).toList();
-        return new Plan(Optional.empty(), activeTenant, domainHousehold, domainPersons);
+        List<Person> domainPersons = persons.stream()
+                .map(p -> Person.of(p.dob(), p.retirementDate()))
+                .toList();
+        return new Plan(Optional.empty(), activeTenant, domainHousehold, domainPersons, assumptions.toRecord());
     }
 }
