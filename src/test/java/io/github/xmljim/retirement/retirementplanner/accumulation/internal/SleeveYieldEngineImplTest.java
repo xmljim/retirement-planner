@@ -14,14 +14,13 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import io.github.xmljim.retirement.retirementplanner.accumulation.SleeveYieldEngine;
 import io.github.xmljim.retirement.retirementplanner.plan.Assumptions;
 import io.github.xmljim.retirement.retirementplanner.plan.account.AccountSleeve;
 import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveKind;
 import io.github.xmljim.retirement.retirementplanner.plan.account.SleeveYieldPolicy;
+import io.github.xmljim.retirement.retirementplanner.shared.CompoundRate;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
 
 class SleeveYieldEngineImplTest {
@@ -156,18 +155,6 @@ class SleeveYieldEngineImplTest {
         assertThat(accrual.amount().signum()).isNegative();
     }
 
-    @ParameterizedTest(name = "monthlyRateFromAnnual({0}) recovers to (1+{0}) after 12 compounds")
-    @ValueSource(strings = {"0.03", "0.045", "0.07", "0.10"})
-    @DisplayName("monthlyRateFromAnnual recovers the annual rate to scale-6 precision after 12 compounds")
-    void monthlyRateRecoversAnnual(String annualRateLiteral) {
-        BigDecimal precisionTolerance = new BigDecimal("0.0000000001");
-        BigDecimal annual = new BigDecimal(annualRateLiteral);
-        BigDecimal monthly = SleeveYieldEngineImpl.monthlyRateFromAnnual(annual);
-        BigDecimal compounded = BigDecimal.ONE.add(monthly).pow(12);
-        BigDecimal expected = BigDecimal.ONE.add(annual);
-        assertThat(compounded).isCloseTo(expected, within(precisionTolerance));
-    }
-
     private Money compoundFor12Months(AccountSleeve sleeve) {
         return IntStream.range(0, 12)
                 .mapToObj(JAN_2026::plusMonths)
@@ -179,6 +166,6 @@ class SleeveYieldEngineImplTest {
     }
 
     private static BigDecimal monthlyRate(BigDecimal annual) {
-        return SleeveYieldEngineImpl.monthlyRateFromAnnual(annual);
+        return CompoundRate.monthlyFromAnnual(annual);
     }
 }
