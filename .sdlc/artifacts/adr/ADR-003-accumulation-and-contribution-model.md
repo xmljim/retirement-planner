@@ -157,6 +157,24 @@ The threshold is based on **prior-year FICA wages**, not current
 salary, not AGI. The model captures this distinction; the contribution
 year `Y` looks at year `Y-1` wages.
 
+`priorYearFicaWages` is sourced as follows:
+- For year `Y` where `Y - 1` is at or after `SalaryProfile.baseDate`,
+  the engine integrates from the salary stream (annualized salary at
+  end of year `Y-1` plus any bonus paid in year `Y-1`).
+- For the simulation's first year, there is no preceding simulated
+  year. Users may supply an explicit baseline
+  (`SalaryProfile.priorYearFicaWages`) — a copy of their most recent
+  W-2 Box 3. If absent, the engine back-derives an approximation as
+  `currentSalary / (1 + annualGrowthRate)` and treats the result as
+  best-effort. The approximation is documented in code; users
+  straddling the threshold should supply the explicit baseline.
+
+§603 routes only the **employee catch-up portion** of an elective
+deferral. Employer-match treatment is governed independently by §604;
+the match remains on the source account unless §604 is elected. A high
+earner whose catch-up is forced to Roth still has their employer match
+flow to the Trad 401(k)/403(b) by default.
+
 #### §604: Roth treatment of employer matching (optional)
 SECURE 2.0 §604 allows plans to permit employees to elect that their
 employer match be treated as Roth. When elected, the match is included
@@ -178,6 +196,33 @@ contribution stream therefore splits into routing decisions at runtime,
 not at policy-definition time. A single elective deferral may produce
 *two* cash flows in the same month: one pre-tax (base deferral) and
 one Roth (catch-up portion under §603).
+
+#### Engine Output Contract
+
+Once §603 and §604 routing exist, the engine cannot adequately describe
+its work with cash flows alone — it must also report when the user's
+intent could not be honored (e.g. a high earner whose plan has no Roth
+designated component). The contract:
+
+- `ContributionEngine.contributeForMonth(...)` returns a structured
+  `MonthlyContributionResult(List<CashFlow> flows, List<EngineWarning>
+  warnings)` — warnings are a first-class output, not log lines.
+- `EngineWarning.kind` is a stable enum
+  (e.g. `SECTION_603_NO_ROTH_DESTINATION`). Adding new values is
+  backward-compatible; renaming is a breaking change. Frontend i18n
+  keys map to enum names.
+- A single contribution-policy line can produce **two** `CashFlow`
+  rows in the same month (base + routed catch-up under §603, base
+  match + Roth match under §604). UI totals must aggregate by
+  account/month, not assume one row per (policy, month).
+- §603 and §604 are orthogonal: a high earner may have catch-up routed
+  to Roth (§603) while their match stays Trad (§604 not elected), or
+  vice versa. The shape accommodates both.
+
+Frontend consumers (and future API contracts) should surface warnings
+next to the contribution display so users can act on them — e.g. a
+high earner whose plan lacks a Roth designated account needs to know
+their catch-up was disallowed, not silently dropped.
 
 At year boundaries: increment year counter, refresh annual limits,
 apply contribution-rate escalation, apply salary growth.
@@ -202,6 +247,7 @@ apply contribution-rate escalation, apply salary growth.
 - The cap-then-match-then-aggregate order is non-trivial to get right; needs unit tests for the standard combinations (cap-binding employee, cap-binding 415(c), tiered match interacting with mid-year catch-up eligibility)
 - §603 routing means a single contribution policy may produce contributions to **two** accounts (pre-tax base + Roth catch-up). The engine and the cash-flow ledger must support this split.
 - §603 needs `priorYearFicaWages` per Person per Employer — for the first simulation year there's no preceding simulation year, so this must be a user-entered input (the most-recent W-2). The salary profile derives subsequent years.
+- ADR-003 now constrains the engine's **response shape** (`MonthlyContributionResult` with structured warnings), not only its math. Frontend and API consumers depend on this shape; changes to the warning enum or result record are breaking.
 - Modeling Mega Backdoor Roth (after-tax 401(k) contributions up to 415(c)) is out of v1 — flag in PRD
 - Bonus modeling depth (lump-sum vs. % of salary) is in scope but the policy shape may evolve; v1 keeps it simple
 

@@ -37,8 +37,11 @@ import io.github.xmljim.retirement.retirementplanner.shared.Money;
  */
 final class Section415cTrimmer {
 
-    private static final Set<CashFlowKind> SECTION_415C_KINDS =
-            EnumSet.of(CashFlowKind.EMPLOYEE_PRETAX, CashFlowKind.EMPLOYEE_ROTH, CashFlowKind.EMPLOYER_MATCH);
+    private static final Set<CashFlowKind> SECTION_415C_KINDS = EnumSet.of(
+            CashFlowKind.EMPLOYEE_PRETAX,
+            CashFlowKind.EMPLOYEE_ROTH,
+            CashFlowKind.EMPLOYEE_ROTH_CATCHUP,
+            CashFlowKind.EMPLOYER_MATCH);
     private static final Set<AccountType> PLAN_FAMILY_401K =
             EnumSet.of(AccountType.TRADITIONAL_401K, AccountType.ROTH_401K);
     private static final Set<AccountType> PLAN_FAMILY_403B =
@@ -115,7 +118,7 @@ final class Section415cTrimmer {
         Money groupEmployee =
                 group.stream().map(CappedContribution::allowedEmployee).reduce(Money.ZERO_USD, Money::plus);
         Money employeeAfter = trimProRata(c.allowedEmployee(), groupEmployee, employeeTrim);
-        return new CappedContribution(c.plan(), employeeAfter, matchAfter);
+        return c.withAmounts(employeeAfter, matchAfter);
     }
 
     private static Money trimProRata(Money portion, Money groupTotal, Money trim) {
