@@ -148,15 +148,15 @@ public class ContributionPolicyMapper {
         }
     }
 
-    private record MatchJson(List<MatchTierJson> tiers) {
+    private record MatchJson(List<MatchTierJson> tiers, boolean asRoth) {
 
         static MatchJson from(EmployerMatch m) {
-            return new MatchJson(m.tiers().stream().map(MatchTierJson::from).toList());
+            return new MatchJson(m.tiers().stream().map(MatchTierJson::from).toList(), m.asRoth());
         }
 
         EmployerMatch toEmployerMatch() {
             return new EmployerMatch(
-                    tiers.stream().map(MatchTierJson::toMatchTier).toList());
+                    tiers.stream().map(MatchTierJson::toMatchTier).toList(), asRoth);
         }
     }
 }

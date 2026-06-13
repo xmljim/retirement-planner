@@ -68,6 +68,7 @@ class AccountRepositoryIntegrationTest {
     private static final long SOLO_TENANT = TenantContext.SOLO_TENANT_ID;
     private static final String OTHER_TENANT_SLUG = "other";
     private static final String FIVE_PCT = "0.05";
+    private static final String SLEEVE_AMOUNT_CENTS = "100.00";
 
     @Container
     @ServiceConnection
@@ -230,7 +231,9 @@ class AccountRepositoryIntegrationTest {
                 new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
                 List.of(
                         AccountSleeve.of(
-                                new SleeveKind.Cash(), Money.usd("100.00"), new SleeveYieldPolicy.MoneyMarket()),
+                                new SleeveKind.Cash(),
+                                Money.usd(SLEEVE_AMOUNT_CENTS),
+                                new SleeveYieldPolicy.MoneyMarket()),
                         AccountSleeve.of(
                                 new SleeveKind.AssetAllocation(),
                                 Money.usd("900.00"),
@@ -252,7 +255,7 @@ class AccountRepositoryIntegrationTest {
         whenTenantIs(SOLO_TENANT);
         Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "VA");
         repository.save(Account.withDefaultSleeve(
-                plan.id().orElseThrow(), AccountType.ROTH_IRA, new OwnerRef.Joint(), Money.usd("100.00")));
+                plan.id().orElseThrow(), AccountType.ROTH_IRA, new OwnerRef.Joint(), Money.usd(SLEEVE_AMOUNT_CENTS)));
 
         planRepository.deleteById(plan.id().orElseThrow());
 
@@ -273,7 +276,7 @@ class AccountRepositoryIntegrationTest {
         ContributionPolicy policy = new ContributionPolicy(
                 new PercentOfSalary(new BigDecimal(FIVE_PCT)),
                 Optional.of(new EscalationPolicy(new BigDecimal("0.01"), new BigDecimal("0.15"))),
-                Optional.of(new EmployerMatch(List.of(
+                Optional.of(EmployerMatch.of(List.of(
                         new MatchTier(new BigDecimal("0.03"), new BigDecimal("1.00")),
                         new MatchTier(new BigDecimal(FIVE_PCT), new BigDecimal("0.50"))))),
                 Optional.of(LocalDate.of(2026, 1, 1)),
@@ -298,8 +301,41 @@ class AccountRepositoryIntegrationTest {
         assertThat(reloadedPolicy.escalation().orElseThrow().annualIncrease()).isEqualByComparingTo("0.01");
         assertThat(reloadedPolicy.match()).isPresent();
         assertThat(reloadedPolicy.match().orElseThrow().tiers()).hasSize(2);
+        assertThat(reloadedPolicy.match().orElseThrow().asRoth()).isFalse();
         assertThat(reloadedPolicy.startDate()).contains(LocalDate.of(2026, 1, 1));
         assertThat(reloadedPolicy.endDate()).contains(LocalDate.of(2040, 12, 31));
+    }
+
+    @Test
+    @DisplayName("ContributionPolicy with §604 Roth match round-trips asRoth flag through JSONB")
+    void contributionPolicyRothMatchRoundTrip() {
+        whenTenantIs(SOLO_TENANT);
+        Plan plan = newPlan(SOLO_TENANT, FilingStatus.SINGLE, "VA");
+        ContributionPolicy policy = new ContributionPolicy(
+                new PercentOfSalary(new BigDecimal(FIVE_PCT)),
+                Optional.empty(),
+                Optional.of(
+                        EmployerMatch.ofRoth(List.of(new MatchTier(new BigDecimal("0.03"), new BigDecimal("1.00"))))),
+                Optional.empty(),
+                Optional.empty());
+
+        Account saved = repository.save(Account.of(
+                plan.id().orElseThrow(),
+                AccountType.TRADITIONAL_401K,
+                new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
+                List.of(AccountSleeve.of(
+                        new SleeveKind.AssetAllocation(),
+                        Money.usd(SLEEVE_AMOUNT_CENTS),
+                        new SleeveYieldPolicy.TracksAllocation())),
+                policy));
+
+        Account reloaded = repository.findById(saved.id().orElseThrow()).orElseThrow();
+        assertThat(reloaded.contributionPolicy()
+                        .orElseThrow()
+                        .match()
+                        .orElseThrow()
+                        .asRoth())
+                .isTrue();
     }
 
     @Test
@@ -315,7 +351,7 @@ class AccountRepositoryIntegrationTest {
                 new OwnerRef.Individual(plan.persons().get(0).id().orElseThrow()),
                 List.of(AccountSleeve.of(
                         new SleeveKind.AssetAllocation(),
-                        Money.usd("100.00"),
+                        Money.usd(SLEEVE_AMOUNT_CENTS),
                         new SleeveYieldPolicy.TracksAllocation())),
                 policy));
 

@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.github.xmljim.retirement.retirementplanner.plan.account.AccountType;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.ContributionPolicy;
+import io.github.xmljim.retirement.retirementplanner.plan.contribution.EmployerMatch;
 import io.github.xmljim.retirement.retirementplanner.shared.CashFlow;
 import io.github.xmljim.retirement.retirementplanner.shared.CashFlowKind;
 import io.github.xmljim.retirement.retirementplanner.shared.Money;
@@ -59,11 +61,21 @@ record CappedContribution(
     List<CashFlow> toCashFlows(YearMonth period) {
         long accountId = plan.account().id().orElseThrow().value();
         CashFlowKind employeeKind = employeeKindOverride.orElseGet(this::resolveKindFromType);
+        CashFlowKind matchKind = resolveMatchKind();
         return Stream.of(
                         new CashFlow(period, accountId, employeeKind, allowedEmployee),
-                        new CashFlow(period, accountId, CashFlowKind.EMPLOYER_MATCH, match))
+                        new CashFlow(period, accountId, matchKind, match))
                 .filter(f -> f.amount().amount().signum() > 0)
                 .toList();
+    }
+
+    private CashFlowKind resolveMatchKind() {
+        boolean asRoth = plan.account()
+                .contributionPolicy()
+                .flatMap(ContributionPolicy::match)
+                .map(EmployerMatch::asRoth)
+                .orElse(false);
+        return asRoth ? CashFlowKind.EMPLOYER_MATCH_ROTH : CashFlowKind.EMPLOYER_MATCH;
     }
 
     private CashFlowKind resolveKindFromType() {

@@ -102,7 +102,7 @@ class ContributionPolicyTest {
         ContributionPolicy withMatch = new ContributionPolicy(
                 new PercentOfSalary(FIVE_PCT),
                 Optional.empty(),
-                Optional.of(new EmployerMatch(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)))),
+                Optional.of(EmployerMatch.of(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)))),
                 Optional.empty(),
                 Optional.empty());
         AccountSleeve sleeve = AccountSleeve.of(
@@ -119,7 +119,7 @@ class ContributionPolicyTest {
         ContributionPolicy withMatch = new ContributionPolicy(
                 new PercentOfSalary(FIVE_PCT),
                 Optional.empty(),
-                Optional.of(new EmployerMatch(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)))),
+                Optional.of(EmployerMatch.of(List.of(new MatchTier(SIX_PCT, HUNDRED_PCT)))),
                 Optional.empty(),
                 Optional.empty());
         AccountSleeve sleeve = AccountSleeve.of(

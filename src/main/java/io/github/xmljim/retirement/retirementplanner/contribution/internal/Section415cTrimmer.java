@@ -41,7 +41,8 @@ final class Section415cTrimmer {
             CashFlowKind.EMPLOYEE_PRETAX,
             CashFlowKind.EMPLOYEE_ROTH,
             CashFlowKind.EMPLOYEE_ROTH_CATCHUP,
-            CashFlowKind.EMPLOYER_MATCH);
+            CashFlowKind.EMPLOYER_MATCH,
+            CashFlowKind.EMPLOYER_MATCH_ROTH);
     private static final Set<AccountType> PLAN_FAMILY_401K =
             EnumSet.of(AccountType.TRADITIONAL_401K, AccountType.ROTH_401K);
     private static final Set<AccountType> PLAN_FAMILY_403B =

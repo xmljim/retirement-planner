@@ -64,16 +64,16 @@ public record ContributionPolicyDto(
         }
     }
 
-    public record EmployerMatchDto(@NotNull @Valid List<MatchTierDto> tiers) {
+    public record EmployerMatchDto(@NotNull @Valid List<MatchTierDto> tiers, Boolean asRoth) {
 
         public static EmployerMatchDto from(EmployerMatch match) {
             return new EmployerMatchDto(
-                    match.tiers().stream().map(MatchTierDto::from).toList());
+                    match.tiers().stream().map(MatchTierDto::from).toList(), match.asRoth());
         }
 
         public EmployerMatch toEmployerMatch() {
             return new EmployerMatch(
-                    tiers.stream().map(MatchTierDto::toMatchTier).toList());
+                    tiers.stream().map(MatchTierDto::toMatchTier).toList(), Boolean.TRUE.equals(asRoth));
         }
     }
 

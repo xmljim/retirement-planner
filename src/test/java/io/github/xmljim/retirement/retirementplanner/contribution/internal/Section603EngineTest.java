@@ -276,7 +276,7 @@ class Section603EngineTest {
     @DisplayName("employer match stays on Trad source even when catch-up routes to Roth")
     void matchStaysOnSourceAccount() {
         SalaryProfile salary = highEarnerSalary(WAGES_ABOVE_THRESHOLD);
-        EmployerMatch match = new EmployerMatch(List.of(new MatchTier(new BigDecimal("0.06"), HUNDRED_PCT)));
+        EmployerMatch match = EmployerMatch.of(List.of(new MatchTier(new BigDecimal("0.06"), HUNDRED_PCT)));
         Account trad = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(TEN_PCT, match));
         Account roth = account(2L, AccountType.ROTH_401K, percentPolicy(BigDecimal.ZERO, null));
         Person person = person(55);
@@ -372,7 +372,7 @@ class Section603EngineTest {
         // Sanity check: with a moderate match, totals stay under §415(c) (70k for 2026)
         // even with the routed catch-up. This validates that the trimmer sees both rows.
         SalaryProfile salary = highEarnerSalary(WAGES_ABOVE_THRESHOLD);
-        EmployerMatch modestMatch = new EmployerMatch(List.of(new MatchTier(new BigDecimal("0.06"), FIFTY_PCT)));
+        EmployerMatch modestMatch = EmployerMatch.of(List.of(new MatchTier(new BigDecimal("0.06"), FIFTY_PCT)));
         Account trad = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(TEN_PCT, modestMatch));
         Account roth = account(2L, AccountType.ROTH_401K, percentPolicy(BigDecimal.ZERO, null));
         Person person = person(55);
