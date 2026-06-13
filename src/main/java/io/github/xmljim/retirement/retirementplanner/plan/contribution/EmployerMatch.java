@@ -21,8 +21,17 @@ import java.util.stream.IntStream;
  * then asks this match for the matched percentage. The §415(c) total-DC
  * cap (applied to employee + employer combined) is the engine's job,
  * not this value type's.
+ *
+ * <p>{@link #asRoth()} carries the SECURE 2.0 §604 election (S-2.6): when
+ * true, matched contributions are emitted as
+ * {@link io.github.xmljim.retirement.retirementplanner.shared.CashFlowKind#EMPLOYER_MATCH_ROTH}
+ * rather than {@code EMPLOYER_MATCH}, and the tax engine (ADR-004 /
+ * EPIC-3) treats the match as a current-year addition to W-2 wages.
+ * Defaults to {@code false} (the historical pre-tax behavior); use
+ * {@link #of(List)} when no §604 election is in effect. §604 is
+ * orthogonal to §603 high-earner Roth catch-up routing.
  */
-public record EmployerMatch(List<MatchTier> tiers) {
+public record EmployerMatch(List<MatchTier> tiers, boolean asRoth) {
 
     public EmployerMatch {
         Objects.requireNonNull(tiers, "tiers");
@@ -40,6 +49,11 @@ public record EmployerMatch(List<MatchTier> tiers) {
                     + snapshot.stream().map(MatchTier::employeeContribPctUpTo).toList());
         }
         tiers = snapshot;
+    }
+
+    /** Convenience constructor for the default (pre-tax) match — no §604 election. */
+    public static EmployerMatch of(List<MatchTier> tiers) {
+        return new EmployerMatch(tiers, false);
     }
 
     /**

@@ -272,7 +272,7 @@ class ContributionEngineImplTest {
     void section415cCapBindsTrimsMatch() {
         SalaryProfile salary = salary(MID_SALARY, 0);
         EmployerMatch lavishMatch =
-                new EmployerMatch(List.of(new MatchTier(new BigDecimal("0.50"), new BigDecimal("2.00"))));
+                EmployerMatch.of(List.of(new MatchTier(new BigDecimal("0.50"), new BigDecimal("2.00"))));
         Account account = account(1L, AccountType.TRADITIONAL_401K, percentPolicy(new BigDecimal("0.50"), lavishMatch));
         Person person = person(40);
 
@@ -405,7 +405,7 @@ class ContributionEngineImplTest {
     }
 
     private static EmployerMatch simpleMatch() {
-        return new EmployerMatch(List.of(new MatchTier(THREE_PCT, HUNDRED_PCT), new MatchTier(FIVE_PCT, HALF)));
+        return EmployerMatch.of(List.of(new MatchTier(THREE_PCT, HUNDRED_PCT), new MatchTier(FIVE_PCT, HALF)));
     }
 
     private static Person person(int age) {
