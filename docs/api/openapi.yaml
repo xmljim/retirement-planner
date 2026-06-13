@@ -665,6 +665,12 @@ components:
     MoneyMarket:
       allOf:
       - $ref: "#/components/schemas/SleeveYieldPolicyDto"
+      - type: object
+        properties:
+          currentRate:
+            type: number
+      required:
+      - currentRate
     OwnerRefDto:
       description: "Account owner. Either INDIVIDUAL with a personId, or JOINT."
       discriminator:

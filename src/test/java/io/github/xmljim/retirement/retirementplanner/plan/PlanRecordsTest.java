@@ -8,6 +8,7 @@ package io.github.xmljim.retirement.retirementplanner.plan;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -96,5 +97,27 @@ class PlanRecordsTest {
         assertThat(new HouseholdId(8L).value()).isEqualTo(8L);
         assertThat(new PersonId(9L).value()).isEqualTo(9L);
         assertThat(new SalaryProfileId(10L).value()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("Assumptions carries the supplied rates")
+    void assumptionsCarriesRates() {
+        Assumptions a = new Assumptions(new BigDecimal("0.07"), new BigDecimal("0.045"));
+        assertThat(a.preRetirementReturnRate()).isEqualByComparingTo("0.07");
+        assertThat(a.cashInterestRate()).isEqualByComparingTo("0.045");
+    }
+
+    @Test
+    @DisplayName("Assumptions rejects null preRetirementReturnRate")
+    void assumptionsRejectsNullReturnRate() {
+        assertThatThrownBy(() -> new Assumptions(null, new BigDecimal("0.045")))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("Assumptions rejects null cashInterestRate")
+    void assumptionsRejectsNullCashInterestRate() {
+        assertThatThrownBy(() -> new Assumptions(new BigDecimal("0.07"), null))
+                .isInstanceOf(NullPointerException.class);
     }
 }

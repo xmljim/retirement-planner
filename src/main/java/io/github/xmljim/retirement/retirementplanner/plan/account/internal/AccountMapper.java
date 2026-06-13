@@ -111,7 +111,8 @@ public class AccountMapper {
                 switch (entity.getYieldType()) {
                     case FIXED_RATE ->
                         new SleeveYieldPolicy.FixedRate(readJson(entity.getYieldData(), BigDecimal.class));
-                    case MONEY_MARKET -> new SleeveYieldPolicy.MoneyMarket();
+                    case MONEY_MARKET ->
+                        new SleeveYieldPolicy.MoneyMarket(readJson(entity.getYieldData(), BigDecimal.class));
                     case TRACKS_ALLOCATION -> new SleeveYieldPolicy.TracksAllocation();
                 };
         return new AccountSleeve(
@@ -142,9 +143,9 @@ public class AccountMapper {
                 entity.setYieldType(AccountSleeveEntity.YieldType.FIXED_RATE);
                 entity.setYieldData(writeJson(fr.annualRate()));
             }
-            case SleeveYieldPolicy.MoneyMarket _ -> {
+            case SleeveYieldPolicy.MoneyMarket mm -> {
                 entity.setYieldType(AccountSleeveEntity.YieldType.MONEY_MARKET);
-                entity.setYieldData(null);
+                entity.setYieldData(writeJson(mm.currentRate()));
             }
             case SleeveYieldPolicy.TracksAllocation _ -> {
                 entity.setYieldType(AccountSleeveEntity.YieldType.TRACKS_ALLOCATION);

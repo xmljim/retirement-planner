@@ -15,8 +15,10 @@ import io.github.xmljim.retirement.retirementplanner.plan.person.Person;
  * Top-level aggregate root for retirement planning (ADR-002).
  *
  * <p>Owns one {@link Household} and one or two {@link Person}s. Future
- * fields (Accounts, Buckets, Assumptions, AssetAllocationPolicy) land
- * in subsequent stories.
+ * fields (Accounts, Buckets, AssetAllocationPolicy) land in subsequent
+ * stories. {@link Assumptions} is defined in this package but not yet
+ * threaded onto {@code Plan} — engine callers pass it explicitly until
+ * S-2.8 wires it into the projection request.
  *
  * <p>{@code tenantId} carries multi-tenancy from day one — solo mode
  * uses the {@code "solo"} tenant seeded in {@code V1__init.sql}.
