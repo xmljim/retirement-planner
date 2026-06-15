@@ -9,6 +9,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -32,9 +34,30 @@ public class ProjectArchitectureTest {
     // classes; .allowEmptyShould(true) keeps the rules in place without
     // false-positive failures.
 
+    private static final DescribedPredicate<JavaClass> BUSINESS_MODULE_INTERNALS =
+            new DescribedPredicate<>(
+                    "reside in any package ['..internal..', '..repository..', '..model.entity..'] outside of "
+                            + "api.internal (controllers' own siblings)") {
+                @Override
+                public boolean test(JavaClass cls) {
+                    String pkg = cls.getPackageName();
+                    boolean forbidden =
+                            pkg.contains(".internal") || pkg.contains(".repository") || pkg.contains(".model.entity");
+                    boolean controllerSibling =
+                            "io.github.xmljim.retirement.retirementplanner.api.internal".equals(pkg);
+                    return forbidden && !controllerSibling;
+                }
+            };
+
     /**
      * CLAUDE.md / ADR-001: controllers delegate to services. They must
      * not import internal packages, repositories, or entities directly.
+     *
+     * <p>Controllers themselves live under {@code api/internal/}, so a
+     * controller calling a sibling presentation helper in the same
+     * package is the expected shape — exclude {@code api/internal/} from
+     * the forbidden set; the rule's target is reaching into <em>business
+     * module</em> internals (plan, contribution, tax, …).
      */
     @ArchTest
     static final ArchRule controllers_must_not_reach_into_internals = noClasses()
@@ -43,8 +66,7 @@ public class ProjectArchitectureTest {
             .or()
             .areAnnotatedWith(Controller.class)
             .should()
-            .dependOnClassesThat()
-            .resideInAnyPackage("..internal..", "..repository..", "..model.entity..")
+            .dependOnClassesThat(BUSINESS_MODULE_INTERNALS)
             .because("CLAUDE.md: controllers delegate to services. They cannot import internals or entities directly.")
             .allowEmptyShould(true);
 

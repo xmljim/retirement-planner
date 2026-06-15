@@ -422,6 +422,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/plans/{id}/projection/cash-flows.csv:
+    get:
+      tags:
+      - Plans
+      summary: Audit-grade CSV export of the deterministic projection's cash-flow
+        ledger (NFR-7)
+      description: "Returns one row per CashFlow across the entire projection horizon.\
+        \ Columns: period (YYYY-MM), accountId, kind, amount (display scale 2). Re-runs\
+        \ the projection server-side; cash flows are not persisted in v1 — the same\
+        \ tuple shape will land in the per-run Parquet snapshot under ADR-006 / EPIC-6."
+      operationId: cashFlowsCsv
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+          default: deterministic
+      responses:
+        "200":
+          description: CSV body (header row + one row per cash flow)
+          content:
+            text/csv:
+              schema:
+                type: string
+        "404":
+          description: Plan not found
+          content:
+            text/csv:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
   /api/v1/accounts/{id}/sleeves:
     get:
       tags:
@@ -800,6 +837,10 @@ components:
           - EMPLOYER_MATCH
           - EMPLOYEE_ROTH_CATCHUP
           - EMPLOYER_MATCH_ROTH
+          - ROTH_CONVERSION_TAXABLE
+          - WITHDRAWAL_ORDINARY
+          - WITHDRAWAL_QUALIFIED
+          - BUCKET_DRAW
         amount:
           $ref: "#/components/schemas/MoneyDto"
     MonthlyProjectionDto:

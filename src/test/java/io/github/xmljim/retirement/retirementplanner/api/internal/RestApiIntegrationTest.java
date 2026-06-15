@@ -5,6 +5,7 @@
  */
 package io.github.xmljim.retirement.retirementplanner.api.internal;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,6 +67,10 @@ class RestApiIntegrationTest {
     private static final String PATH_PLANS = "/api/v1/plans";
     private static final String PATH_PLAN_BY_ID = "/api/v1/plans/{id}";
     private static final String PATH_PLAN_PROJECTION = "/api/v1/plans/{id}/projection";
+    private static final String PATH_PLAN_CASH_FLOWS_CSV = "/api/v1/plans/{id}/projection/cash-flows.csv";
+
+    private static final String PARAM_MODE = "mode";
+    private static final String MODE_DETERMINISTIC = "deterministic";
     private static final String PATH_PLAN_PERSONS = "/api/v1/plans/{planId}/persons";
     private static final String PATH_PERSON_BY_ID = "/api/v1/persons/{id}";
     private static final String PATH_PLAN_ACCOUNTS = "/api/v1/plans/{planId}/accounts";
@@ -165,7 +170,7 @@ class RestApiIntegrationTest {
     void planProjectionEndpoint() throws Exception {
         long planId = createPlan(FILING_SINGLE, STATE_VA, DOB_DEFAULT);
 
-        mockMvc.perform(get(PATH_PLAN_PROJECTION, planId).param("mode", "deterministic"))
+        mockMvc.perform(get(PATH_PLAN_PROJECTION, planId).param(PARAM_MODE, MODE_DETERMINISTIC))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].phase").value("ACCUMULATION"))
@@ -173,7 +178,23 @@ class RestApiIntegrationTest {
                 .andExpect(jsonPath("$[0].accountBalances").isArray())
                 .andExpect(jsonPath("$[0].cashFlows").isArray());
 
-        mockMvc.perform(get(PATH_PLAN_PROJECTION, 9999L).param("mode", "deterministic"))
+        mockMvc.perform(get(PATH_PLAN_PROJECTION, 9999L).param(PARAM_MODE, MODE_DETERMINISTIC))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("GET .../projection/cash-flows.csv returns text/csv with header row and 404s on missing plan")
+    void cashFlowsCsvEndpoint() throws Exception {
+        long planId = createPlan(FILING_SINGLE, STATE_VA, DOB_DEFAULT);
+
+        MvcResult res = mockMvc.perform(get(PATH_PLAN_CASH_FLOWS_CSV, planId).param(PARAM_MODE, MODE_DETERMINISTIC))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", Matchers.containsString("text/csv")))
+                .andReturn();
+        String body = res.getResponse().getContentAsString();
+        assertThat(body.lines().findFirst()).hasValue("period,accountId,kind,amount");
+
+        mockMvc.perform(get(PATH_PLAN_CASH_FLOWS_CSV, 9999L).param(PARAM_MODE, MODE_DETERMINISTIC))
                 .andExpect(status().isNotFound());
     }
 
