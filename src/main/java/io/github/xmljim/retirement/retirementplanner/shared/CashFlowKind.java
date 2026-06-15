@@ -39,5 +39,31 @@ public enum CashFlowKind {
      * Employer match routed to Roth under SECURE 2.0 §604 (employee
      * elects Roth treatment of match). Reserved for S-2.6.
      */
-    EMPLOYER_MATCH_ROTH
+    EMPLOYER_MATCH_ROTH,
+    /**
+     * Taxable portion of a Roth conversion (Traditional → Roth). The
+     * amount is added to ordinary income for the conversion year.
+     * Reserved for EPIC-3 (tax engine).
+     */
+    ROTH_CONVERSION_TAXABLE,
+    /**
+     * Withdrawal taxed at ordinary income rates — pre-tax 401(k)/403(b),
+     * Traditional IRA, RMDs, and the taxable portion of Social Security.
+     * Reserved for EPIC-4 / EPIC-5 (drawdown).
+     */
+    WITHDRAWAL_ORDINARY,
+    /**
+     * Qualified-distribution withdrawal — Roth principal/earnings post
+     * 5-year rule, qualified HSA medical, etc. Tax-free at withdrawal.
+     * Reserved for EPIC-4 / EPIC-5 (drawdown).
+     */
+    WITHDRAWAL_QUALIFIED,
+    /**
+     * Cash drawn from a goal-oriented {@code Bucket} (Bridge, Travel,
+     * Bucket-list, Healthcare, Legacy). The bucket engine emits these
+     * as it spends down its earmarked balance; tax treatment follows
+     * the source account's withdrawal kind. Reserved for EPIC-4 (bucket
+     * engine).
+     */
+    BUCKET_DRAW
 }

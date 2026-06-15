@@ -85,6 +85,21 @@ public interface PlanOperations {
     List<MonthlyProjectionDto> projection(
             @PathVariable("id") long id, @RequestParam(name = "mode", defaultValue = "deterministic") String mode);
 
+    @Operation(
+            summary = "Audit-grade CSV export of the deterministic projection's cash-flow ledger (NFR-7)",
+            description = "Returns one row per CashFlow across the entire projection horizon. Columns: "
+                    + "period (YYYY-MM), accountId, kind, amount (display scale 2). "
+                    + "Re-runs the projection server-side; cash flows are not persisted in v1 — "
+                    + "the same tuple shape will land in the per-run Parquet snapshot under ADR-006 / EPIC-6.")
+    @ApiResponse(responseCode = "200", description = "CSV body (header row + one row per cash flow)")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Plan not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @GetMapping(value = "/{id}/projection/cash-flows.csv", produces = "text/csv")
+    String cashFlowsCsv(
+            @PathVariable("id") long id, @RequestParam(name = "mode", defaultValue = "deterministic") String mode);
+
     @Operation(summary = "Delete a Plan by id (cascades to Persons and Accounts)")
     @ApiResponse(responseCode = "204", description = "Deleted (or absent)")
     @DeleteMapping("/{id}")

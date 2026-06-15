@@ -17,6 +17,7 @@ import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanService;
 import io.github.xmljim.retirement.retirementplanner.shared.TenantContext;
+import io.github.xmljim.retirement.retirementplanner.simulation.CashFlowExportService;
 import io.github.xmljim.retirement.retirementplanner.simulation.ProjectionService;
 
 /**
@@ -29,11 +30,17 @@ class PlanController implements PlanOperations {
     private final PlanService service;
     private final TenantContext tenantContext;
     private final ProjectionService projectionService;
+    private final CashFlowExportService cashFlowExportService;
 
-    PlanController(PlanService service, TenantContext tenantContext, ProjectionService projectionService) {
+    PlanController(
+            PlanService service,
+            TenantContext tenantContext,
+            ProjectionService projectionService,
+            CashFlowExportService cashFlowExportService) {
         this.service = service;
         this.tenantContext = tenantContext;
         this.projectionService = projectionService;
+        this.cashFlowExportService = cashFlowExportService;
     }
 
     @Override
@@ -67,6 +74,14 @@ class PlanController implements PlanOperations {
         return projectionService.deterministic(new PlanId(id)).stream()
                 .map(MonthlyProjectionDto::from)
                 .toList();
+    }
+
+    @Override
+    public String cashFlowsCsv(long id, String mode) {
+        if (!"deterministic".equals(mode)) {
+            throw new IllegalArgumentException("unsupported projection mode: " + mode);
+        }
+        return cashFlowExportService.toCsv(projectionService.deterministic(new PlanId(id)));
     }
 
     @Override
