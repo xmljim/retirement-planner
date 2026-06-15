@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import io.github.xmljim.retirement.retirementplanner.api.dto.MonthlyProjectionDto;
 import io.github.xmljim.retirement.retirementplanner.api.dto.PlanDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,6 +36,9 @@ import jakarta.validation.Valid;
  * {@code api/internal} so the contract surface stays decoupled from the
  * delegation logic.
  */
+// HTTP response codes ("200", "404") repeat across @ApiResponse annotations on each operation; that's the documented
+// shape of springdoc's contract. Extracting them to constants would obscure the spec, not improve it.
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @Tag(name = "Plans", description = "Top-level retirement plan aggregates")
 @RequestMapping(path = "/api/v1/plans", produces = MediaType.APPLICATION_JSON_VALUE)
 public interface PlanOperations {
@@ -69,6 +74,16 @@ public interface PlanOperations {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     PlanDto replace(@PathVariable("id") long id, @Valid @RequestBody PlanDto plan);
+
+    @Operation(summary = "Month-by-month deterministic accumulation projection from today to retirement")
+    @ApiResponse(responseCode = "200", description = "Monthly projection (possibly empty if already past horizon)")
+    @ApiResponse(
+            responseCode = "404",
+            description = "Plan not found",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
+    @GetMapping("/{id}/projection")
+    List<MonthlyProjectionDto> projection(
+            @PathVariable("id") long id, @RequestParam(name = "mode", defaultValue = "deterministic") String mode);
 
     @Operation(summary = "Delete a Plan by id (cascades to Persons and Accounts)")
     @ApiResponse(responseCode = "204", description = "Deleted (or absent)")

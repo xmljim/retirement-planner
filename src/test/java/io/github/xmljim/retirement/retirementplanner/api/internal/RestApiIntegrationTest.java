@@ -65,6 +65,7 @@ class RestApiIntegrationTest {
 
     private static final String PATH_PLANS = "/api/v1/plans";
     private static final String PATH_PLAN_BY_ID = "/api/v1/plans/{id}";
+    private static final String PATH_PLAN_PROJECTION = "/api/v1/plans/{id}/projection";
     private static final String PATH_PLAN_PERSONS = "/api/v1/plans/{planId}/persons";
     private static final String PATH_PERSON_BY_ID = "/api/v1/persons/{id}";
     private static final String PATH_PLAN_ACCOUNTS = "/api/v1/plans/{planId}/accounts";
@@ -160,6 +161,23 @@ class RestApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/plans/{id}/projection returns deterministic month-by-month projection")
+    void planProjectionEndpoint() throws Exception {
+        long planId = createPlan(FILING_SINGLE, STATE_VA, DOB_DEFAULT);
+
+        mockMvc.perform(get(PATH_PLAN_PROJECTION, planId).param("mode", "deterministic"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].phase").value("ACCUMULATION"))
+                .andExpect(jsonPath("$[0].period").exists())
+                .andExpect(jsonPath("$[0].accountBalances").isArray())
+                .andExpect(jsonPath("$[0].cashFlows").isArray());
+
+        mockMvc.perform(get(PATH_PLAN_PROJECTION, 9999L).param("mode", "deterministic"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("DELETE /api/v1/plans/{id} returns 204 and subsequent GET returns 404")
     void deletePlanReturns204() throws Exception {
         long planId = createPlan(FILING_SINGLE, STATE_VA, DOB_DEFAULT);
@@ -172,10 +190,8 @@ class RestApiIntegrationTest {
     void personEndpoints() throws Exception {
         long planId = createPlan(FILING_MFJ, STATE_CA, DOB_DEFAULT);
 
-        ObjectNode addPerson = json.createObjectNode()
-                .put(FIELD_DOB, "1978-04-22")
-                .putNull("id")
-                .putNull("salaryProfileId");
+        ObjectNode addPerson =
+                personJson("1978-04-22", "2045-01-01").putNull("id").putNull("salaryProfileId");
         MvcResult addedResult = mockMvc.perform(post(PATH_PLAN_PERSONS, planId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(addPerson.toString()))
@@ -191,14 +207,14 @@ class RestApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dob").value("1978-04-22"));
 
-        ObjectNode replace = json.createObjectNode().put(FIELD_DOB, "1979-01-01");
+        ObjectNode replace = personJson("1979-01-01", "2045-01-01");
         mockMvc.perform(put(PATH_PERSON_BY_ID, personId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(replace.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dob").value("1979-01-01"));
 
-        ObjectNode third = json.createObjectNode().put(FIELD_DOB, "1980-01-01");
+        ObjectNode third = personJson("1980-01-01", "2045-01-01");
         mockMvc.perform(post(PATH_PLAN_PERSONS, planId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(third.toString()))
@@ -310,11 +326,17 @@ class RestApiIntegrationTest {
         household.put("state", state);
         plan.set("household", household);
         ArrayNode persons = json.createArrayNode();
-        ObjectNode person = json.createObjectNode();
-        person.put(FIELD_DOB, dob);
-        persons.add(person);
+        persons.add(personJson(dob, "2040-01-01"));
         plan.set("persons", persons);
+        ObjectNode assumptions = json.createObjectNode();
+        assumptions.put("preRetirementReturnRate", "0.07");
+        assumptions.put("cashInterestRate", "0.04");
+        plan.set("assumptions", assumptions);
         return plan;
+    }
+
+    private ObjectNode personJson(String dob, String retirementDate) {
+        return json.createObjectNode().put(FIELD_DOB, dob).put("retirementDate", retirementDate);
     }
 
     private ObjectNode newAccountRequest(long ownerPersonId, String accountType) {

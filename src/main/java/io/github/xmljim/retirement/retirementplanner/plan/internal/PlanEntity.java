@@ -5,6 +5,7 @@
  */
 package io.github.xmljim.retirement.retirementplanner.plan.internal;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,12 @@ public class PlanEntity {
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PersonEntity> persons = new ArrayList<>();
+
+    @Column(name = "pre_retirement_return_rate", nullable = false, precision = 7, scale = 6)
+    private BigDecimal preRetirementReturnRate;
+
+    @Column(name = "cash_interest_rate", nullable = false, precision = 7, scale = 6)
+    private BigDecimal cashInterestRate;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -77,6 +84,22 @@ public class PlanEntity {
     public void addPerson(PersonEntity person) {
         persons.add(person);
         person.setPlan(this);
+    }
+
+    public BigDecimal getPreRetirementReturnRate() {
+        return preRetirementReturnRate;
+    }
+
+    public void setPreRetirementReturnRate(BigDecimal preRetirementReturnRate) {
+        this.preRetirementReturnRate = preRetirementReturnRate;
+    }
+
+    public BigDecimal getCashInterestRate() {
+        return cashInterestRate;
+    }
+
+    public void setCashInterestRate(BigDecimal cashInterestRate) {
+        this.cashInterestRate = cashInterestRate;
     }
 
     @PrePersist

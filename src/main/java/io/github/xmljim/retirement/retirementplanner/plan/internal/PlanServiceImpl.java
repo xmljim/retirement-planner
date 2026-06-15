@@ -42,7 +42,12 @@ class PlanServiceImpl implements PlanService {
     @Override
     public Plan replace(PlanId id, Plan replacement) {
         Plan existing = repository.findById(id).orElseThrow(() -> notFound(id));
-        Plan merged = new Plan(existing.id(), existing.tenantId(), replacement.household(), existing.persons());
+        Plan merged = new Plan(
+                existing.id(),
+                existing.tenantId(),
+                replacement.household(),
+                existing.persons(),
+                replacement.assumptions());
         return repository.save(merged);
     }
 

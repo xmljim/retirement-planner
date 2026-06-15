@@ -51,6 +51,7 @@ class PersonRepositoryImpl implements PersonRepository {
         }
         PersonEntity entity = new PersonEntity();
         entity.setDob(person.dob());
+        entity.setRetirementDate(person.retirementDate());
         entity.setSalaryProfile(new SalaryProfileEntity());
         parent.addPerson(entity);
         PersonEntity saved = jpa.save(entity);
@@ -66,6 +67,7 @@ class PersonRepositoryImpl implements PersonRepository {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Person " + id.value() + " not found for tenant " + activeTenant));
         existing.setDob(person.dob());
+        existing.setRetirementDate(person.retirementDate());
         return PersonMappers.toRecord(jpa.save(existing));
     }
 

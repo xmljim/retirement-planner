@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import io.github.xmljim.retirement.retirementplanner.plan.Assumptions;
 import io.github.xmljim.retirement.retirementplanner.plan.Plan;
 import io.github.xmljim.retirement.retirementplanner.plan.PlanId;
 import io.github.xmljim.retirement.retirementplanner.plan.household.FilingStatus;
@@ -49,6 +51,8 @@ class PlanRepositoryIntegrationTest {
 
     private static final long SOLO_TENANT = TenantContext.SOLO_TENANT_ID;
     private static final String OTHER_TENANT_SLUG = "other";
+    private static final LocalDate RETIREMENT_DATE = LocalDate.of(2040, 1, 1);
+    private static final Assumptions ASSUMPTIONS = new Assumptions(new BigDecimal("0.07"), new BigDecimal("0.04"));
 
     @Container
     @ServiceConnection
@@ -94,8 +98,8 @@ class PlanRepositoryIntegrationTest {
     void savePersistsPlanWithHouseholdAndPerson() {
         whenTenantIs(SOLO_TENANT);
 
-        Plan saved = repository.save(Plan.of(
-                SOLO_TENANT, Household.of(FilingStatus.SINGLE, "VA"), List.of(Person.of(LocalDate.of(1975, 6, 15)))));
+        Plan saved = repository.save(
+                plan(SOLO_TENANT, FilingStatus.SINGLE, "VA", List.of(person(LocalDate.of(1975, 6, 15)))));
 
         assertThat(saved.id()).isPresent();
 
@@ -114,10 +118,11 @@ class PlanRepositoryIntegrationTest {
     void savePersistsTwoPersons() {
         whenTenantIs(SOLO_TENANT);
 
-        Plan saved = repository.save(Plan.of(
+        Plan saved = repository.save(plan(
                 SOLO_TENANT,
-                Household.of(FilingStatus.MARRIED_FILING_JOINTLY, "CA"),
-                List.of(Person.of(LocalDate.of(1970, 1, 1)), Person.of(LocalDate.of(1972, 5, 20)))));
+                FilingStatus.MARRIED_FILING_JOINTLY,
+                "CA",
+                List.of(person(LocalDate.of(1970, 1, 1)), person(LocalDate.of(1972, 5, 20)))));
 
         Plan reloaded = repository.findById(saved.id().orElseThrow()).orElseThrow();
         assertThat(reloaded.persons()).hasSize(2);
@@ -132,8 +137,8 @@ class PlanRepositoryIntegrationTest {
         long otherTenant = lookupTenantIdBySlug(OTHER_TENANT_SLUG);
         whenTenantIs(otherTenant);
 
-        Plan inOther = repository.save(Plan.of(
-                otherTenant, Household.of(FilingStatus.SINGLE, "TX"), List.of(Person.of(LocalDate.of(1980, 3, 3)))));
+        Plan inOther = repository.save(
+                plan(otherTenant, FilingStatus.SINGLE, "TX", List.of(person(LocalDate.of(1980, 3, 3)))));
 
         whenTenantIs(SOLO_TENANT);
         assertThat(repository.findById(inOther.id().orElseThrow())).isEmpty();
@@ -143,13 +148,11 @@ class PlanRepositoryIntegrationTest {
     @DisplayName("findAll is scoped to active tenant")
     void findAllIsTenantScoped() {
         whenTenantIs(SOLO_TENANT);
-        repository.save(Plan.of(
-                SOLO_TENANT, Household.of(FilingStatus.SINGLE, "NY"), List.of(Person.of(LocalDate.of(1980, 1, 1)))));
+        repository.save(plan(SOLO_TENANT, FilingStatus.SINGLE, "NY", List.of(person(LocalDate.of(1980, 1, 1)))));
 
         long otherTenant = lookupTenantIdBySlug(OTHER_TENANT_SLUG);
         whenTenantIs(otherTenant);
-        repository.save(Plan.of(
-                otherTenant, Household.of(FilingStatus.SINGLE, "FL"), List.of(Person.of(LocalDate.of(1981, 2, 2)))));
+        repository.save(plan(otherTenant, FilingStatus.SINGLE, "FL", List.of(person(LocalDate.of(1981, 2, 2)))));
 
         whenTenantIs(SOLO_TENANT);
         List<Plan> visible = repository.findAll();
@@ -160,8 +163,8 @@ class PlanRepositoryIntegrationTest {
     @DisplayName("deleteById cascades to Household and Persons")
     void deleteByIdCascades() {
         whenTenantIs(SOLO_TENANT);
-        Plan saved = repository.save(Plan.of(
-                SOLO_TENANT, Household.of(FilingStatus.SINGLE, "VA"), List.of(Person.of(LocalDate.of(1975, 6, 15)))));
+        Plan saved = repository.save(
+                plan(SOLO_TENANT, FilingStatus.SINGLE, "VA", List.of(person(LocalDate.of(1975, 6, 15)))));
         PlanId id = saved.id().orElseThrow();
 
         repository.deleteById(id);
@@ -175,8 +178,8 @@ class PlanRepositoryIntegrationTest {
     void deleteByIdRefusesCrossTenant() {
         long otherTenant = lookupTenantIdBySlug(OTHER_TENANT_SLUG);
         whenTenantIs(otherTenant);
-        Plan inOther = repository.save(Plan.of(
-                otherTenant, Household.of(FilingStatus.SINGLE, "TX"), List.of(Person.of(LocalDate.of(1980, 3, 3)))));
+        Plan inOther = repository.save(
+                plan(otherTenant, FilingStatus.SINGLE, "TX", List.of(person(LocalDate.of(1980, 3, 3)))));
 
         whenTenantIs(SOLO_TENANT);
         repository.deleteById(inOther.id().orElseThrow());
@@ -190,8 +193,7 @@ class PlanRepositoryIntegrationTest {
     void saveRefusesTenantMismatch() {
         long otherTenant = lookupTenantIdBySlug(OTHER_TENANT_SLUG);
         whenTenantIs(SOLO_TENANT);
-        Plan mismatched = Plan.of(
-                otherTenant, Household.of(FilingStatus.SINGLE, "VA"), List.of(Person.of(LocalDate.of(1975, 6, 15))));
+        Plan mismatched = plan(otherTenant, FilingStatus.SINGLE, "VA", List.of(person(LocalDate.of(1975, 6, 15))));
 
         assertThatThrownBy(() -> repository.save(mismatched))
                 .rootCause()
@@ -211,5 +213,13 @@ class PlanRepositoryIntegrationTest {
                     .getSingleResult();
             return id.longValue();
         });
+    }
+
+    private static Person person(LocalDate dob) {
+        return Person.of(dob, RETIREMENT_DATE);
+    }
+
+    private static Plan plan(long tenantId, FilingStatus filingStatus, String state, List<Person> persons) {
+        return Plan.of(tenantId, Household.of(filingStatus, state), persons, ASSUMPTIONS);
     }
 }
